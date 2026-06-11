@@ -1,0 +1,267 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Tenant {
+  id        String   @id @default(uuid())
+  name      String
+  slug      String   @unique
+  plan      String   @default("free") // free, starter, professional, agency
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users        User[]
+  sites        Site[]
+  pages        Page[]
+  apiKeys      ApiKey[]
+  quotaUsages  QuotaUsage[]
+  snapshots    ScoreSnapshot[]
+  integrations Integration[]
+}
+
+model User {
+  id        String   @id @default(uuid())
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  email     String   @unique
+  name      String
+  role      String   @default("editor") // admin, editor, viewer
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([tenantId])
+}
+
+model Site {
+  id            String   @id @default(uuid())
+  tenantId      String
+  tenant        Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  name          String
+  domain        String
+  platform      String   @default("custom") // wordpress, nextjs, shopify, go, custom
+  defaultLocale String   @default("en-US")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  pages        Page[]
+  apiKeys      ApiKey[]
+  snapshots    ScoreSnapshot[]
+  integrations Integration[]
+
+  @@unique([tenantId, domain])
+  @@index([tenantId])
+}
+
+model Page {
+  id            String   @id @default(uuid())
+  tenantId      String
+  tenant        Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  siteId        String
+  site          Site     @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  url           String
+  normalizedUrl String
+  pageType      String   @default("generic") // homepage, article, product, category, landing, documentation, local_business, generic
+  targetKeyword String?
+  locale        String
+  lastScoredAt  DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  snapshots ScoreSnapshot[]
+
+  @@unique([siteId, normalizedUrl])
+  @@index([tenantId])
+  @@index([siteId])
+}
+
+model ApiKey {
+  id         String    @id @default(uuid())
+  tenantId   String
+  tenant     Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  siteId     String?
+  site       Site?     @relation(fields: [siteId], references: [id], onDelete: SetNull)
+  name       String
+  keyHash    String    @unique
+  keyPrefix  String
+  scopes     String[]
+  lastUsedAt DateTime?
+  revokedAt  DateTime?
+  createdAt  DateTime  @default(now())
+
+  @@index([tenantId])
+  @@index([keyHash])
+}
+
+model QuotaUsage {
+  id        String   @id @default(uuid())
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  siteId    String?
+  endpoint  String
+  units     Int      @default(1)
+  date      DateTime // Format: YYYY-MM-DD
+  createdAt DateTime @default(now())
+
+  @@index([tenantId])
+  @@index([tenantId, date])
+}
+
+model ScoreSnapshot {
+  id            String   @id @default(uuid())
+  tenantId      String
+  tenant        Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  siteId        String
+  site          Site     @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  pageId        String?
+  page          Page?    @relation(fields: [pageId], references: [id], onDelete: SetNull)
+  url           String
+  normalizedUrl String
+  scoreVersion  String   @default("seosuite-score-v1.1")
+  finalScore    Int
+  scoreBand     String   // excellent, good, needs_improvement, poor, critical
+  pageType      String
+  locale        String
+  platform      String
+  source        String   // live_url, draft_content
+  durationMs    Int
+  createdAt     DateTime @default(now())
+
+  moduleResults       ScoreModuleResult[]
+  auditIssues         AuditIssue[]
+  recommendations     Recommendation[]
+  providerEnrichments ProviderEnrichment[]
+  linkOpportunities   InternalLinkOpportunity[]
+  aiVisibilityCheck   AiVisibilityCheck?
+
+  @@index([tenantId])
+  @@index([siteId])
+  @@index([pageId])
+}
+
+model ScoreModuleResult {
+  id              String        @id @default(uuid())
+  tenantId        String
+  scoreSnapshotId String
+  scoreSnapshot   ScoreSnapshot @relation(fields: [scoreSnapshotId], references: [id], onDelete: Cascade)
+  moduleKey       String
+  label           String
+  score           Int
+  maxScore        Int
+  status          String
+  createdAt       DateTime      @default(now())
+
+  @@index([tenantId])
+  @@index([scoreSnapshotId])
+}
+
+model AuditIssue {
+  id                 String        @id @default(uuid())
+  tenantId           String
+  scoreSnapshotId    String
+  scoreSnapshot      ScoreSnapshot @relation(fields: [scoreSnapshotId], references: [id], onDelete: Cascade)
+  code               String
+  severity           String        // critical, high, medium, low, info, experimental
+  module             String
+  title              String
+  impact             String
+  evidenceJson       Json
+  recommendation     String
+  implementationHint String?
+  confidence         Float
+  createdAt          DateTime      @default(now())
+
+  @@index([tenantId])
+  @@index([scoreSnapshotId])
+}
+
+model Recommendation {
+  id                 String        @id @default(uuid())
+  tenantId           String
+  scoreSnapshotId    String
+  scoreSnapshot      ScoreSnapshot @relation(fields: [scoreSnapshotId], references: [id], onDelete: Cascade)
+  code               String
+  title              String
+  module             String
+  severity           String
+  recommendation     String
+  implementationHint String?
+  estimatedEffort    String        // low, medium, high
+  estimatedImpact    String        // low, medium, high
+  confidence         Float
+  createdAt          DateTime      @default(now())
+
+  @@index([tenantId])
+  @@index([scoreSnapshotId])
+}
+
+model Integration {
+  id             String   @id @default(uuid())
+  tenantId       String
+  tenant         Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  siteId         String?
+  site           Site?    @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  provider       String   // neuronwriter, google_search_console, pagespeed
+  status         String   @default("active")
+  encryptedCreds String
+  configJson     Json?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([tenantId])
+  @@index([siteId])
+}
+
+model ProviderEnrichment {
+  id                 String        @id @default(uuid())
+  tenantId           String
+  scoreSnapshotId    String
+  scoreSnapshot      ScoreSnapshot @relation(fields: [scoreSnapshotId], references: [id], onDelete: Cascade)
+  provider           String        // neuronwriter, etc.
+  status             String        // success, failed
+  requestMetaJson    Json?
+  responseMetaJson   Json?
+  normalizedDataJson Json?
+  durationMs         Int
+  createdAt          DateTime      @default(now())
+
+  @@index([tenantId])
+  @@index([scoreSnapshotId])
+}
+
+model InternalLinkOpportunity {
+  id              String        @id @default(uuid())
+  tenantId        String
+  scoreSnapshotId String
+  scoreSnapshot   ScoreSnapshot @relation(fields: [scoreSnapshotId], references: [id], onDelete: Cascade)
+  targetUrl       String
+  anchorSuggestion String
+  reason          String
+  relationship    String
+  confidence      Float
+  createdAt       DateTime      @default(now())
+
+  @@index([tenantId])
+  @@index([scoreSnapshotId])
+}
+
+model AiVisibilityCheck {
+  id                         String        @id @default(uuid())
+  tenantId                   String
+  scoreSnapshotId            String        @unique
+  scoreSnapshot              ScoreSnapshot @relation(fields: [scoreSnapshotId], references: [id], onDelete: Cascade)
+  aiVisibilityReadinessScore Int
+  answerability              Float
+  citationReadiness          Float
+  entityClarity              Float
+  aiParseability             Float
+  brandTrustSignals          Float
+  platformReadinessJson      Json          // ChatGPT, Perplexity, Google AIO, Bing Copilot readiness ratings
+  createdAt                  DateTime      @default(now())
+
+  @@index([tenantId])
+}

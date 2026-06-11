@@ -1,0 +1,88 @@
+{
+  "urls": [
+    {
+      "url": "https://nextjs.org",
+      "pageType": "homepage",
+      "platform": "nextjs",
+      "targetKeyword": "react framework"
+    },
+    {
+      "url": "https://nextjs.org/docs",
+      "pageType": "documentation",
+      "platform": "nextjs",
+      "targetKeyword": "nextjs documentation"
+    },
+    {
+      "url": "https://vercel.com",
+      "pageType": "landing",
+      "platform": "custom",
+      "targetKeyword": "frontend cloud"
+    },
+    {
+      "url": "https://react.dev",
+      "pageType": "documentation",
+      "platform": "custom",
+      "targetKeyword": "react library"
+    },
+    {
+      "url": "https://wordpress.org/plugins/seo-by-rank-math/",
+      "pageType": "product",
+      "platform": "wordpress",
+      "targetKeyword": "wordpress seo plugin"
+    },
+    {
+      "url": "https://woocommerce.com/",
+      "pageType": "homepage",
+      "platform": "wordpress",
+      "targetKeyword": "ecommerce platform"
+    },
+    {
+      "url": "https://www.shopify.com/tour/ecommerce-website",
+      "pageType": "landing",
+      "platform": "shopify",
+      "targetKeyword": "ecommerce website builder"
+    },
+    {
+      "url": "https://stripe.com/docs",
+      "pageType": "documentation",
+      "platform": "custom",
+      "targetKeyword": "payment api docs"
+    },
+    {
+      "url": "https://blog.hubspot.com/marketing/seo",
+      "pageType": "article",
+      "platform": "custom",
+      "targetKeyword": "what is seo"
+    },
+    {
+      "url": "https://www.apple.com/iphone-15/",
+      "pageType": "product",
+      "platform": "custom",
+      "targetKeyword": "iphone 15"
+    },
+    {
+      "url": "https://www.nike.com/men/shoes",
+      "pageType": "category",
+      "platform": "custom",
+      "targetKeyword": "mens shoes"
+    },
+    {
+      "url": "https://developer.mozilla.org/en-US/docs/Web/HTML",
+      "pageType": "documentation",
+      "platform": "custom",
+      "targetKeyword": "html documentation"
+    },
+    {
+      "url": "https://www.gmedya.com",
+      "pageType": "homepage",
+      "platform": "custom",
+      "targetKeyword": "digital agency"
+    },
+    {
+      "url": "https://www.efesusstone.com",
+      "pageType": "homepage",
+      "platform": "custom",
+      "targetKeyword": "natural stone supplier"
+    }
+  ]
+}

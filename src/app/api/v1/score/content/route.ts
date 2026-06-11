@@ -1,0 +1,242 @@
+import { NextRequest } from 'next/server';
+import { withAuth, AuthenticatedContext } from '@/lib/auth/middleware';
+import { successResponse, errorResponse } from '@/lib/response';
+import { prisma } from '@/lib/db/prisma';
+import { parseHtml, normalizeUrl } from '@/lib/parsers/html-parser';
+import { ScoringEngine } from '@/lib/scoring/engine';
+import { ScoreContext, ScoreOptions } from '@/lib/scoring/types';
+import { checkRateLimit, createRateLimitResponse } from '@/lib/utils/rate-limit';
+import { logApiError, logApiInfo } from '@/lib/utils/logger';
+
+const MAX_CONTENT_SIZE = 2 * 1024 * 1024; // 2 MB
+
+async function handler(req: NextRequest, context: AuthenticatedContext) {
+  const startTime = Date.now();
+  
+  // Rate Limit Check (120 req / hour)
+  const rl = checkRateLimit(context.tenantId, 'score/content', 120, req.headers.get('x-forwarded-for') || 'unknown');
+  if (!rl.success) {
+    return createRateLimitResponse(rl.info, context.requestId);
+  }
+
+  try {
+    const body = await req.json().catch(() => ({}));
+    const {
+      siteId,
+      url,
+      html,
+      contentId,
+      title: providedTitle,
+      metaDescription: providedDescription,
+      targetKeyword,
+      locale,
+      platform,
+      pageType,
+      options: rawOptions,
+    } = body;
+
+    // --- Validation ---
+    if (!html || typeof html !== 'string') {
+      return errorResponse('Missing or invalid field: html', 'VALIDATION_ERROR', 400, { field: 'html' }, context.requestId);
+    }
+
+    // Size limit
+    const contentBytes = new TextEncoder().encode(html).length;
+    if (contentBytes > MAX_CONTENT_SIZE) {
+      return errorResponse(
+        `Content payload exceeds maximum size of ${MAX_CONTENT_SIZE / 1024 / 1024}MB.`,
+        'VALIDATION_ERROR',
+        400,
+        { field: 'html', maxBytes: MAX_CONTENT_SIZE, receivedBytes: contentBytes },
+        context.requestId
+      );
+    }
+
+    // Resolve site
+    const resolvedSiteId = siteId || context.siteId;
+    if (!resolvedSiteId) {
+      return errorResponse('Missing siteId.', 'VALIDATION_ERROR', 400, { field: 'siteId' }, context.requestId);
+    }
+
+    const site = await prisma.site.findFirst({
+      where: { id: resolvedSiteId, tenantId: context.tenantId },
+    });
+    if (!site) {
+      return errorResponse('Site not found or access denied.', 'NOT_FOUND', 404, { siteId: resolvedSiteId }, context.requestId);
+    }
+
+    const scoreOptions: ScoreOptions = {
+      includeNeuronWriter: rawOptions?.includeNeuronWriter ?? false,
+      includePerformance: rawOptions?.includePerformance ?? false,
+      includeAiVisibility: rawOptions?.includeAiVisibility ?? true,
+      renderJavascript: false,
+      storeSnapshot: rawOptions?.storeSnapshot ?? rawOptions?.saveSnapshot ?? true,
+    };
+
+    // --- Parse provided HTML content directly (no fetch) ---
+    const draftUrl = url || `https://${site.domain}/draft/${contentId || 'untitled'}`;
+    const normalizedUrl = normalizeUrl(draftUrl);
+
+    // For draft content, we simulate a 200 status since the content is provided directly
+    const parsed = parseHtml(html, 200, {}, normalizedUrl);
+
+    // Override title/description if explicitly provided in request body
+    if (providedTitle) {
+      parsed.title = providedTitle;
+    }
+    if (providedDescription) {
+      parsed.metaDescription = providedDescription;
+    }
+
+    // --- Build Score Context ---
+    const scoreContext: ScoreContext = {
+      tenantId: context.tenantId,
+      siteId: resolvedSiteId,
+      url: draftUrl,
+      normalizedUrl,
+      targetKeyword: targetKeyword || undefined,
+      locale: locale || site.defaultLocale,
+      pageType: pageType || 'generic',
+      platform: platform || site.platform,
+      options: scoreOptions,
+      parsed,
+    };
+
+    // --- Run Scoring Engine ---
+    const engine = new ScoringEngine();
+    const scoreOutput = await engine.scorePage(scoreContext, startTime);
+
+    // --- Persist Snapshot ---
+    let snapshotId: string | null = null;
+    if (scoreOptions.storeSnapshot) {
+      const snapshot = await prisma.scoreSnapshot.create({
+        data: {
+          tenantId: context.tenantId,
+          siteId: resolvedSiteId,
+          url: draftUrl,
+          normalizedUrl,
+          scoreVersion: scoreOutput.scoreVersion,
+          finalScore: scoreOutput.finalScore,
+          scoreBand: scoreOutput.scoreBand,
+          pageType: scoreContext.pageType || 'generic',
+          locale: scoreContext.locale || 'en-US',
+          platform: scoreContext.platform || 'custom',
+          source: 'draft_content',
+          durationMs: scoreOutput.durationMs,
+          moduleResults: {
+            create: scoreOutput.modules.map((m) => ({
+              tenantId: context.tenantId,
+              moduleKey: m.key,
+              label: m.label,
+              score: m.score,
+              maxScore: m.maxScore,
+              status: m.status,
+            })),
+          },
+          auditIssues: {
+            create: [...scoreOutput.topIssues, ...scoreOutput.experimentalSignals].map((iss) => ({
+              tenantId: context.tenantId,
+              code: iss.code,
+              severity: iss.severity,
+              module: iss.module,
+              title: iss.title,
+              impact: iss.impact,
+              evidenceJson: iss.evidence || {},
+              recommendation: iss.recommendation,
+              implementationHint: iss.implementationHint || null,
+              confidence: iss.confidence,
+            })),
+          },
+          providerEnrichments: {
+            create: (scoreOutput.providerEnrichments || []).map((pe: any) => ({
+              tenantId: context.tenantId,
+              provider: pe.provider,
+              status: pe.providerStatus,
+              requestMetaJson: pe.requestMeta || {},
+              responseMetaJson: pe.responseMeta || {},
+              normalizedDataJson: {
+                targetKeyword: pe.targetKeyword,
+                contentScore: pe.contentScore,
+                terms: pe.terms,
+                competitorGaps: pe.competitorGaps,
+                recommendedHeadings: pe.recommendedHeadings,
+                confidence: pe.confidence,
+              },
+              durationMs: pe.durationMs,
+            })),
+          },
+        },
+      });
+      snapshotId = snapshot.id;
+
+      // Track quota
+      await prisma.quotaUsage.create({
+        data: {
+          tenantId: context.tenantId,
+          siteId: resolvedSiteId,
+          endpoint: 'score/content',
+          units: 1,
+          date: new Date(new Date().toISOString().split('T')[0]),
+        },
+      });
+    }
+
+    // --- Build Response ---
+    const responseData = {
+      snapshotId,
+      sourceType: 'draft_content',
+      scoreVersion: scoreOutput.scoreVersion,
+      url: draftUrl,
+      normalizedUrl,
+      platform: scoreContext.platform,
+      pageType: scoreContext.pageType,
+      locale: scoreContext.locale,
+      finalScore: scoreOutput.finalScore,
+      scoreBand: scoreOutput.scoreBand,
+      modules: scoreOutput.modules,
+      topIssues: scoreOutput.topIssues,
+      quickWins: scoreOutput.quickWins,
+      nextActions: scoreOutput.nextActions,
+      experimentalSignals: scoreOutput.experimentalSignals,
+      platformReadiness: scoreOutput.platformReadiness,
+      durationMs: scoreOutput.durationMs,
+      semanticAnalysis: scoreOutput.semanticAnalysis || null,
+      aiVisibility: scoreOutput.aiVisibility || null,
+      providerEnrichments: (scoreOutput.providerEnrichments || []).map((pe: any) => ({
+        provider: pe.provider,
+        sourceType: pe.sourceType,
+        providerStatus: pe.providerStatus,
+        targetKeyword: pe.targetKeyword,
+        contentScore: pe.contentScore,
+        terms: pe.terms,
+        competitorGaps: pe.competitorGaps,
+        recommendedHeadings: pe.recommendedHeadings,
+        confidence: pe.confidence,
+        durationMs: pe.durationMs,
+        errorMessage: pe.errorMessage,
+      })),
+      createdAt: new Date().toISOString(),
+    };
+
+    return successResponse(responseData, scoreOutput.durationMs, context.requestId);
+  } catch (error: any) {
+    logApiError({
+      requestId: context.requestId,
+      tenantId: context.tenantId,
+      endpoint: 'score/content',
+      durationMs: Date.now() - startTime,
+      errorCode: 'INTERNAL_ERROR',
+      error
+    });
+    
+    return errorResponse(
+      'An unexpected error occurred during content scoring.',
+      'INTERNAL_ERROR',
+      500,
+      { error: error?.message },
+      context.requestId
+    );
+  }
+}
+
+export const POST = withAuth(handler, 'score:read');
