@@ -4,6 +4,7 @@ SeoSuite is a multi-tenant, CMS-agnostic SEO and AI visibility intelligence plat
 
 > [!WARNING]
 > **Important Notices:**
+> - **Dashboard Authentication:** The current SaaS Dashboard runs in demo mode using `DASHBOARD_MOCK_TENANT_ID` (or a seed fallback). Dashboard demo mode is *not* production authentication. Real auth must be implemented before external customer access. Production environments should never expose dashboard routes without authentication.
 > - **AI Visibility:** AI visibility metrics represent a readiness score based on structure, citations, and semantics. Visibility on ChatGPT, Perplexity, Google AIO, or Bing Copilot is *not guaranteed*.
 > - **Provider Fallbacks:** The NeuronWriter integration may use mocked/fallback data for testing; this is not real production enrichment.
 > - **Headless Rendering:** Evaluating Client-Side Rendered (CSR) apps via headless browsers (Puppeteer/Playwright) is currently out of scope for Phase 2.

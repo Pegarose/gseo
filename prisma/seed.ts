@@ -9,11 +9,18 @@ async function main() {
   // 1. Create or get default GMedya Tenant
   const tenant = await prisma.tenant.upsert({
     where: { slug: 'gmedya' },
-    update: {},
+    update: {
+      aiCreditLimit: 500,
+      aiCreditUsed: 45,
+      supportNotes: 'GMedya internal dogfooding and testing tenant.',
+    },
     create: {
       name: 'GMedya Dogfooding',
       slug: 'gmedya',
       plan: 'agency',
+      aiCreditLimit: 500,
+      aiCreditUsed: 45,
+      supportNotes: 'GMedya internal dogfooding and testing tenant.',
     },
   });
   console.log(`Tenant verified: ${tenant.name} (${tenant.id})`);

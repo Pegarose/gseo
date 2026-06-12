@@ -39,3 +39,22 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# GSeoSuite Geliştirme & Test Scriptleri
+test-phase*.ts
+test-phase*.js
+test-phase*.tsx
+test-phase*.jsx
+test-*.ts
+test-*.js
+
+# Dogfooding Raporları ve Çıktıları
+dogfood-report.json
+dogfood-summary.md
+dogfood-urls.json
+
+# Geçici Veri ve Log Dosyaları
+wp-product-translations.txt
+*.log
+*.zip
+dist/

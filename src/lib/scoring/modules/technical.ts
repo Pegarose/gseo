@@ -168,16 +168,15 @@ export class TechnicalModule implements ScoreModule {
     let hasInvalidJson = false;
 
     if (jsonLd && jsonLd.length > 0) {
-      for (const rawLd of jsonLd) {
-        try {
-          const parsed = JSON.parse(rawLd);
-          if (Array.isArray(parsed)) {
-            schemas.push(...parsed);
-          } else {
-            schemas.push(parsed);
-          }
-        } catch (e) {
+      for (const parsed of jsonLd) {
+        if (parsed._error === 'INVALID_JSON') {
           hasInvalidJson = true;
+          continue;
+        }
+        if (Array.isArray(parsed)) {
+          schemas.push(...parsed);
+        } else {
+          schemas.push(parsed);
         }
       }
     }
