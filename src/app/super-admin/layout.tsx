@@ -30,9 +30,16 @@ export default async function SuperAdminLayout({
   const cookieStore = await cookies();
   const token = cookieStore.get('super_admin_token')?.value;
 
-  // Retrieve the token from environment variable or fallback to a developer secret
-  const validToken = process.env.SUPER_ADMIN_TOKEN || 'gseo_admin_secret_token';
-  const isAuthenticated = token === validToken;
+  const validToken = process.env.SUPER_ADMIN_TOKEN;
+  const isProduction = process.env.NODE_ENV === 'production';
+  
+  let isAuthenticated = false;
+  if (validToken) {
+    isAuthenticated = token === validToken;
+  } else if (!isProduction) {
+    // Only allow the fallback token in non-production environments
+    isAuthenticated = token === 'gseo_admin_secret_token';
+  }
 
   if (!isAuthenticated) {
     return (

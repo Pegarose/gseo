@@ -11,6 +11,7 @@ import {
   ExternalLink 
 } from 'lucide-react';
 import TenantQuotaForm from './TenantQuotaForm';
+import TenantCreditSync from './TenantCreditSync';
 
 export const dynamic = 'force-dynamic';
 
@@ -92,6 +93,13 @@ export default async function SuperAdminTenantDetailPage({ params }: PageProps) 
               </div>
             </dl>
           </div>
+
+          {/* AI Credit Sync Card */}
+          <TenantCreditSync
+            tenantId={tenant.id}
+            initialUsed={tenant.aiCreditUsed}
+            limit={tenant.aiCreditLimit}
+          />
 
           {/* Quota Edit Form */}
           <TenantQuotaForm 

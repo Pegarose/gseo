@@ -8,6 +8,7 @@ import { ScoringEngine } from '@/lib/scoring/engine';
 import { ScoreContext, ScoreOptions } from '@/lib/scoring/types';
 import { checkRateLimit, createRateLimitResponse } from '@/lib/utils/rate-limit';
 import { logApiError, logApiInfo } from '@/lib/utils/logger';
+import { checkQuotaLimit, incrementTenantCredits } from '@/lib/auth/quota';
 
 const MAX_URL_LENGTH = 2048;
 
@@ -52,6 +53,18 @@ async function handler(req: NextRequest, context: AuthenticatedContext) {
     });
     if (!site) {
       return errorResponse('Site not found or access denied.', 'NOT_FOUND', 404, { siteId: resolvedSiteId }, context.requestId);
+    }
+
+    // --- Quota Limit Check ---
+    const quota = await checkQuotaLimit(context.tenantId);
+    if (!quota.success) {
+      return errorResponse(
+        `AI Credit quota limit exceeded. Current monthly usage: ${quota.used}/${quota.limit}`,
+        'QUOTA_EXCEEDED',
+        403,
+        { used: quota.used, limit: quota.limit },
+        context.requestId
+      );
     }
 
     const scoreOptions: ScoreOptions = {
@@ -154,6 +167,8 @@ async function handler(req: NextRequest, context: AuthenticatedContext) {
               normalizedDataJson: {
                 targetKeyword: pe.targetKeyword,
                 contentScore: pe.contentScore,
+                targetWordCount: pe.targetWordCount,
+                targetReadability: pe.targetReadability,
                 terms: pe.terms,
                 competitorGaps: pe.competitorGaps,
                 recommendedHeadings: pe.recommendedHeadings,
@@ -176,6 +191,9 @@ async function handler(req: NextRequest, context: AuthenticatedContext) {
           date: new Date(new Date().toISOString().split('T')[0]), // Day start
         },
       });
+
+      // Increment cached credit used in Tenant
+      await incrementTenantCredits(context.tenantId);
     }
 
     // --- Build Response ---
@@ -204,6 +222,8 @@ async function handler(req: NextRequest, context: AuthenticatedContext) {
         providerStatus: pe.providerStatus,
         targetKeyword: pe.targetKeyword,
         contentScore: pe.contentScore,
+        targetWordCount: pe.targetWordCount,
+        targetReadability: pe.targetReadability,
         terms: pe.terms,
         competitorGaps: pe.competitorGaps,
         recommendedHeadings: pe.recommendedHeadings,

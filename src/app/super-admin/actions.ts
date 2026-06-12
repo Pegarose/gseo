@@ -2,15 +2,24 @@
 
 import { prisma } from '@/lib/db/prisma';
 import { revalidatePath } from 'next/cache';
+import { recalculateTenantCredits } from '@/lib/auth/quota';
 
 // Helper to verify the admin token
 async function verifyAdminAuth() {
   const { cookies } = await import('next/headers');
   const cookieStore = await cookies();
   const token = cookieStore.get('super_admin_token')?.value;
-  const validToken = process.env.SUPER_ADMIN_TOKEN || 'gseo_admin_secret_token';
+  const validToken = process.env.SUPER_ADMIN_TOKEN;
+  const isProduction = process.env.NODE_ENV === 'production';
   
-  if (token !== validToken) {
+  let isAuthenticated = false;
+  if (validToken) {
+    isAuthenticated = token === validToken;
+  } else if (!isProduction) {
+    isAuthenticated = token === 'gseo_admin_secret_token';
+  }
+  
+  if (!isAuthenticated) {
     throw new Error('Yetkisiz işlem: Super Admin oturumu bulunamadı.');
   }
 }
@@ -182,4 +191,17 @@ export async function getSystemOverview() {
       { version: 'Next.js SDK v0.8.2', count: 2, percentage: 20 }
     ]
   };
+}
+
+// 8. Manual Sync / Recalculate Tenant Credits
+export async function syncTenantCredits(tenantId: string) {
+  await verifyAdminAuth();
+  
+  const updatedUsed = await recalculateTenantCredits(tenantId);
+  
+  revalidatePath('/super-admin');
+  revalidatePath(`/super-admin/tenants/${tenantId}`);
+  revalidatePath('/dashboard');
+  
+  return { success: true, aiCreditUsed: updatedUsed };
 }

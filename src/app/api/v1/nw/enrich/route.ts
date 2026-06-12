@@ -50,6 +50,8 @@ async function handler(req: NextRequest, context: AuthenticatedContext) {
       providerStatus: enrichment.providerStatus,
       targetKeyword: enrichment.targetKeyword,
       contentScore: enrichment.contentScore,
+      targetWordCount: enrichment.targetWordCount,
+      targetReadability: enrichment.targetReadability,
       terms: enrichment.terms,
       competitorGaps: enrichment.competitorGaps,
       recommendedHeadings: enrichment.recommendedHeadings,
