@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { recordRequestMetric } from './observability/metrics';
 
 export interface SuccessResponse<T> {
   success: true;
@@ -27,6 +28,12 @@ export function successResponse<T>(
   requestId?: string
 ): NextResponse<SuccessResponse<T>> {
   const reqId = requestId || crypto.randomUUID();
+  recordRequestMetric({
+    endpoint: 'unknown',
+    statusCode: 200,
+    durationMs,
+    timestamp: new Date().toISOString(),
+  });
   return NextResponse.json({
     success: true,
     data,
@@ -45,6 +52,12 @@ export function errorResponse(
   requestId?: string
 ): NextResponse<ErrorResponse> {
   const reqId = requestId || crypto.randomUUID();
+  recordRequestMetric({
+    endpoint: 'unknown',
+    statusCode: status,
+    durationMs: 0,
+    timestamp: new Date().toISOString(),
+  });
   return NextResponse.json(
     {
       success: false,

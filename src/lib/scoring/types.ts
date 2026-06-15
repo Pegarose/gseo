@@ -33,9 +33,9 @@ export interface ScoreContext {
   locale?: string;
   pageType?: string;
   platform?: string;
-  options: ScoreOptions;
+  options?: ScoreOptions;
   parsed: ParsedPage;
-  enrichments?: any[];
+  enrichments?: Record<string, unknown>[];
 }
 
 export interface AuditIssue {
@@ -62,6 +62,21 @@ export interface Recommendation {
   confidence: number;
 }
 
+export interface AiVisibilityData {
+  answerability: number;
+  citationReadiness: number;
+  entityClarity: number;
+  aiParseability: number;
+  sourceTrustSignals: number;
+  platformReadiness: {
+    platform: string;
+    score: number;
+    confidence: number;
+    rationale: string;
+    experimental: boolean;
+  }[];
+}
+
 export interface ScoreModuleResult {
   key: string;
   label: string;
@@ -70,6 +85,8 @@ export interface ScoreModuleResult {
   status: ModuleStatus;
   issues: AuditIssue[];
   recommendations: Recommendation[];
+  aiVisibilityData?: AiVisibilityData;
+  semanticAnalysisData?: Record<string, unknown>;
 }
 
 export interface ScoreModule {

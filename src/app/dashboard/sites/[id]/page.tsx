@@ -1,7 +1,8 @@
 import { getSiteDetail } from '../../actions';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { Globe, ArrowLeft, Play, Settings2, BarChart2 } from 'lucide-react';
+import { Globe, ArrowLeft, Settings2, BarChart2 } from 'lucide-react';
+import RunSiteAudit from './RunSiteAudit';
 
 export const dynamic = 'force-dynamic';
 
@@ -51,14 +52,7 @@ export default async function SiteDetailPage({ params }: { params: { id: string 
             Configure
           </button>
           
-          <button 
-            className="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
-            title="Full site crawling is coming soon in Phase 2"
-          >
-            <Play className="w-4 h-4" />
-            Run Site Audit
-            <span className="ml-1 text-[10px] bg-indigo-800 px-1.5 py-0.5 rounded uppercase font-bold tracking-wider">Coming Soon</span>
-          </button>
+          <RunSiteAudit siteId={site.id} domain={site.domain} />
         </div>
       </div>
 

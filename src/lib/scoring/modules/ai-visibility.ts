@@ -1,21 +1,4 @@
-import { ScoreModule, ScoreContext, ScoreModuleResult, AuditIssue } from '../types';
-
-export interface PlatformReadiness {
-  platform: string;
-  score: number;
-  confidence: number;
-  rationale: string;
-  experimental: boolean;
-}
-
-export interface AiVisibilityData {
-  answerability: number;
-  citationReadiness: number;
-  entityClarity: number;
-  aiParseability: number;
-  sourceTrustSignals: number;
-  platformReadiness: PlatformReadiness[];
-}
+import { ScoreModule, ScoreContext, ScoreModuleResult, AuditIssue, AiVisibilityData } from '../types';
 
 export class AiVisibilityModule implements ScoreModule {
   key = 'ai_visibility_readiness';
@@ -132,7 +115,7 @@ export class AiVisibilityModule implements ScoreModule {
     });
 
     // 5. Platform Readiness
-    const platformReadiness: PlatformReadiness[] = [
+    const platformReadiness: AiVisibilityData['platformReadiness'] = [
       {
         platform: 'ChatGPT',
         score: Math.round((answerability + entityClarity) / 2 * 100),
@@ -195,7 +178,7 @@ export class AiVisibilityModule implements ScoreModule {
       status: this.getStatus(score),
       issues,
       recommendations: [],
-      ...( { aiVisibilityData } as any )
+      aiVisibilityData
     };
   }
 

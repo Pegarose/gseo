@@ -2,7 +2,8 @@ import { NextRequest } from 'next/server';
 import { withAuth, AuthenticatedContext } from '@/lib/auth/middleware';
 import { successResponse, errorResponse } from '@/lib/response';
 import { prisma } from '@/lib/db/prisma';
-import { checkRateLimit, createRateLimitResponse } from '@/lib/utils/rate-limit';
+import { checkRateLimit } from '@/lib/rate-limit';
+import { createRateLimitResponse } from '@/lib/utils/rate-limit';
 import { logApiError } from '@/lib/utils/logger';
 
 const PLAN_LIMITS: Record<string, Record<string, number>> = {
@@ -23,7 +24,7 @@ async function handler(req: NextRequest, context: AuthenticatedContext) {
   const startTime = Date.now();
 
   // Rate Limit Check (300 req / hour)
-  const rl = checkRateLimit(context.tenantId, 'quota', 300, req.headers.get('x-forwarded-for') || 'unknown');
+  const rl = await checkRateLimit(context.tenantId, 'quota', 300, req.headers.get('x-forwarded-for') || 'unknown');
   if (!rl.success) {
     return createRateLimitResponse(rl.info, context.requestId);
   }

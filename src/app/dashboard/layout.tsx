@@ -3,12 +3,13 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { 
-  LayoutDashboard, 
-  Globe, 
-  Sparkles, 
-  Settings, 
-  LogOut, 
+import { signOut } from 'next-auth/react';
+import {
+  LayoutDashboard,
+  Globe,
+  Sparkles,
+  Settings,
+  LogOut,
   Menu,
   X,
   Search
@@ -29,11 +30,15 @@ export default function DashboardLayout({
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
+  const handleSignOut = async () => {
+    await signOut({ callbackUrl: '/login' });
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 flex">
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
-        <div 
+        <div
           className="fixed inset-0 z-40 bg-gray-900/80 lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
@@ -51,7 +56,7 @@ export default function DashboardLayout({
             </div>
             <span className="font-bold text-xl text-gray-900 tracking-tight">SeoSuite</span>
           </Link>
-          <button 
+          <button
             className="lg:hidden text-gray-500 hover:text-gray-700"
             onClick={() => setSidebarOpen(false)}
           >
@@ -60,11 +65,6 @@ export default function DashboardLayout({
         </div>
 
         <div className="px-6 py-4">
-          <div className="bg-indigo-50 border border-indigo-100 rounded-md p-3 mb-6">
-            <span className="text-xs font-semibold text-indigo-700 uppercase tracking-wider block mb-1">Demo Mode</span>
-            <span className="text-sm text-indigo-900 font-medium truncate block">GMedya Dogfooding</span>
-          </div>
-
           <nav className="space-y-1">
             {navigation.map((item) => {
               const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
@@ -73,8 +73,8 @@ export default function DashboardLayout({
                   key={item.name}
                   href={item.href}
                   className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-                    isActive 
-                      ? 'bg-indigo-50 text-indigo-700' 
+                    isActive
+                      ? 'bg-indigo-50 text-indigo-700'
                       : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                   }`}
                 >
@@ -87,7 +87,10 @@ export default function DashboardLayout({
         </div>
 
         <div className="mt-auto p-6 border-t border-gray-100">
-          <button className="flex items-center gap-3 text-sm font-medium text-gray-600 hover:text-gray-900 w-full px-3 py-2 transition-colors">
+          <button
+            onClick={handleSignOut}
+            className="flex items-center gap-3 text-sm font-medium text-gray-600 hover:text-gray-900 w-full px-3 py-2 transition-colors"
+          >
             <LogOut className="w-5 h-5 text-gray-400" />
             Sign out
           </button>
@@ -99,7 +102,7 @@ export default function DashboardLayout({
         {/* Top Header */}
         <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 sm:px-6 lg:px-8 z-10">
           <div className="flex items-center gap-4">
-            <button 
+            <button
               className="lg:hidden text-gray-500 hover:text-gray-700 focus:outline-none"
               onClick={() => setSidebarOpen(true)}
             >
@@ -107,9 +110,9 @@ export default function DashboardLayout({
             </button>
             <div className="hidden sm:flex items-center bg-gray-100 rounded-full px-4 py-2 w-64 focus-within:ring-2 focus-within:ring-indigo-500 focus-within:bg-white transition-all">
               <Search className="w-4 h-4 text-gray-400 mr-2" />
-              <input 
-                type="text" 
-                placeholder="Search..." 
+              <input
+                type="text"
+                placeholder="Search..."
                 className="bg-transparent border-none focus:ring-0 text-sm w-full text-gray-900 placeholder-gray-500 outline-none"
               />
             </div>

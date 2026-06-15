@@ -5,7 +5,7 @@ import path from 'path';
 import 'dotenv/config';
 
 const prisma = new PrismaClient();
-const API_URL = 'http://localhost:3000/api/v1';
+const API_URL = process.env.DOGFOOD_API_URL || 'http://localhost:3001/api/v1';
 
 async function setupTestTenant() {
   const rawKey = `gseo_dogfood_${crypto.randomBytes(16).toString('hex')}`;
@@ -15,7 +15,7 @@ async function setupTestTenant() {
       id: 'tenant_df_' + Date.now(),
       name: 'Dogfood Tenant',
       slug: 'dogfood-' + Date.now(),
-      plan: 'pro'
+      plan: 'professional'
     }
   });
 
@@ -25,7 +25,7 @@ async function setupTestTenant() {
       name: 'Dogfood Key',
       keyPrefix: rawKey.substring(0, 12),
       keyHash: hashedKey,
-      scopes: ['score:write', 'score:read', 'site:write', 'semantic:read']
+      scopes: ['score:read', 'site:write', 'semantic:read']
     }
   });
 
@@ -98,7 +98,7 @@ async function run() {
           targetKeyword,
           pageType,
           platform,
-          options: { includeNeuronWriter: true }
+          options: { includeNeuronWriter: true, includeAiVisibility: true }
         })
       });
 

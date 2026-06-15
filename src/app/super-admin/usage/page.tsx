@@ -44,7 +44,7 @@ export default async function SuperAdminUsagePage() {
                       {stat.endpoint}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-center text-gray-900 font-semibold">
-                      {stat.totalCalls}
+                      {stat.requestCount}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-center text-gray-900 font-semibold">
                       {stat.totalUnits}

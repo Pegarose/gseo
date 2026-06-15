@@ -43,8 +43,8 @@ export interface NWEnrichmentResult {
   durationMs: number;
   errorMessage?: string;
   // Request/response meta for DB persistence — no credentials
-  requestMeta: Record<string, any>;
-  responseMeta: Record<string, any>;
+  requestMeta: Record<string, unknown>;
+  responseMeta: Record<string, unknown>;
 }
 
 interface CredsResult {
@@ -64,11 +64,11 @@ async function resolveCredentials(
       where: { siteId, tenantId, provider: 'neuronwriter', status: 'active' },
     });
     if (siteIntegration?.encryptedCreds) {
-      const config = siteIntegration.configJson as any;
+      const config = (siteIntegration.configJson ?? {}) as { projectId?: string | number | null };
       return { 
         apiKey: siteIntegration.encryptedCreds, 
         sourceType: 'site_integration',
-        projectId: config?.projectId || null
+        projectId: config.projectId ? String(config.projectId) : null
       };
     }
   }
@@ -78,11 +78,11 @@ async function resolveCredentials(
     where: { tenantId, siteId: null, provider: 'neuronwriter', status: 'active' },
   });
   if (tenantIntegration?.encryptedCreds) {
-    const config = tenantIntegration.configJson as any;
+    const config = (tenantIntegration.configJson ?? {}) as { projectId?: string | number | null };
     return { 
       apiKey: tenantIntegration.encryptedCreds, 
       sourceType: 'tenant_integration',
-      projectId: config?.projectId || null
+      projectId: config.projectId ? String(config.projectId) : null
     };
   }
 
@@ -355,7 +355,8 @@ export async function enrichWithNeuronWriter(
     normalized.requestMeta = { projectId, keyword: targetKeyword, queryId };
     return normalized;
 
-  } catch (err: any) {
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'NeuronWriter API error';
     return {
       sourceType,
       providerStatus: 'failed',
@@ -368,9 +369,9 @@ export async function enrichWithNeuronWriter(
       recommendedHeadings: [],
       confidence: 0,
       durationMs: Date.now() - startTime,
-      errorMessage: err.message,
+      errorMessage: message,
       requestMeta: { keyword: targetKeyword, source: sourceType },
-      responseMeta: { error: err.message },
+      responseMeta: { error: message },
     };
   }
 }

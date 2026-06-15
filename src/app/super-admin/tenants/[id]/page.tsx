@@ -7,11 +7,11 @@ import {
   Users as UsersIcon, 
   Globe, 
   Key, 
-  Puzzle, 
-  ExternalLink 
+  Puzzle
 } from 'lucide-react';
 import TenantQuotaForm from './TenantQuotaForm';
 import TenantCreditSync from './TenantCreditSync';
+import ImpersonateButton from './ImpersonateButton';
 
 export const dynamic = 'force-dynamic';
 
@@ -53,15 +53,7 @@ export default async function SuperAdminTenantDetailPage({ params }: PageProps) 
           </div>
         </div>
 
-        {/* Impersonation Placeholder Button */}
-        <Link 
-          href={`/dashboard`} 
-          className="inline-flex items-center gap-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold text-xs py-2 px-3 border border-gray-300 rounded-lg transition-colors"
-          title="Tenant yetkileriyle müşteri panelini salt-okunur modda simüle eder."
-        >
-          <ExternalLink className="w-3.5 h-3.5" />
-          Müşteri Panelini Gör (Read-Only Preview)
-        </Link>
+        <ImpersonateButton tenantId={tenant.id} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

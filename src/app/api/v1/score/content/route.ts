@@ -1,12 +1,14 @@
 import { NextRequest } from 'next/server';
+import { Prisma } from '@prisma/client';
 import { withAuth, AuthenticatedContext } from '@/lib/auth/middleware';
 import { successResponse, errorResponse } from '@/lib/response';
 import { prisma } from '@/lib/db/prisma';
 import { parseHtml, normalizeUrl } from '@/lib/parsers/html-parser';
 import { ScoringEngine } from '@/lib/scoring/engine';
-import { ScoreContext, ScoreOptions } from '@/lib/scoring/types';
-import { checkRateLimit, createRateLimitResponse } from '@/lib/utils/rate-limit';
-import { logApiError, logApiInfo } from '@/lib/utils/logger';
+import { ScoreContext, ScoreOptions, Recommendation } from '@/lib/scoring/types';
+import { checkRateLimit } from '@/lib/rate-limit';
+import { createRateLimitResponse } from '@/lib/utils/rate-limit';
+import { logApiError } from '@/lib/utils/logger';
 import { checkQuotaLimit, incrementTenantCredits } from '@/lib/auth/quota';
 
 const MAX_CONTENT_SIZE = 2 * 1024 * 1024; // 2 MB
@@ -15,7 +17,7 @@ async function handler(req: NextRequest, context: AuthenticatedContext) {
   const startTime = Date.now();
   
   // Rate Limit Check (120 req / hour)
-  const rl = checkRateLimit(context.tenantId, 'score/content', 120, req.headers.get('x-forwarded-for') || 'unknown');
+  const rl = await checkRateLimit(context.tenantId, 'score/content', 120, req.headers.get('x-forwarded-for') || 'unknown');
   if (!rl.success) {
     return createRateLimitResponse(rl.info, context.requestId);
   }
@@ -86,6 +88,9 @@ async function handler(req: NextRequest, context: AuthenticatedContext) {
       storeSnapshot: rawOptions?.storeSnapshot ?? rawOptions?.saveSnapshot ?? true,
     };
 
+    // AI scoring always consumes credits, even if the caller asks not to persist the snapshot.
+    const storeSnapshotAllowed = scoreOptions.storeSnapshot;
+
     // --- Parse provided HTML content directly (no fetch) ---
     const draftUrl = url || `https://${site.domain}/draft/${contentId || 'untitled'}`;
     const normalizedUrl = normalizeUrl(draftUrl);
@@ -121,7 +126,7 @@ async function handler(req: NextRequest, context: AuthenticatedContext) {
 
     // --- Persist Snapshot ---
     let snapshotId: string | null = null;
-    if (scoreOptions.storeSnapshot) {
+    if (storeSnapshotAllowed) {
       const snapshot = await prisma.scoreSnapshot.create({
         data: {
           tenantId: context.tenantId,
@@ -161,12 +166,12 @@ async function handler(req: NextRequest, context: AuthenticatedContext) {
             })),
           },
           providerEnrichments: {
-            create: (scoreOutput.providerEnrichments || []).map((pe: any) => ({
+            create: (scoreOutput.providerEnrichments || []).map((pe) => ({
               tenantId: context.tenantId,
-              provider: pe.provider,
-              status: pe.providerStatus,
-              requestMetaJson: pe.requestMeta || {},
-              responseMetaJson: pe.responseMeta || {},
+              provider: String(pe.provider),
+              status: String(pe.providerStatus),
+              requestMetaJson: pe.requestMeta as Prisma.InputJsonValue,
+              responseMetaJson: pe.responseMeta as Prisma.InputJsonValue,
               normalizedDataJson: {
                 targetKeyword: pe.targetKeyword,
                 contentScore: pe.contentScore,
@@ -176,10 +181,46 @@ async function handler(req: NextRequest, context: AuthenticatedContext) {
                 competitorGaps: pe.competitorGaps,
                 recommendedHeadings: pe.recommendedHeadings,
                 confidence: pe.confidence,
-              },
-              durationMs: pe.durationMs,
+              } as unknown as Prisma.InputJsonValue,
+              durationMs: Number(pe.durationMs),
             })),
           },
+          recommendations: {
+            create: scoreOutput.recommendations.map((rec: Recommendation) => ({
+              tenantId: context.tenantId,
+              code: rec.code,
+              title: rec.title,
+              module: rec.module,
+              severity: rec.severity,
+              recommendation: rec.recommendation,
+              implementationHint: rec.implementationHint || null,
+              estimatedEffort: rec.estimatedEffort,
+              estimatedImpact: rec.estimatedImpact,
+              confidence: rec.confidence,
+            })),
+          },
+          aiVisibilityCheck: scoreOutput.aiVisibility
+            ? {
+                create: {
+                  tenantId: context.tenantId,
+                  aiVisibilityReadinessScore: Math.round(
+                    ((Number(scoreOutput.aiVisibility.answerability) +
+                      Number(scoreOutput.aiVisibility.citationReadiness) +
+                      Number(scoreOutput.aiVisibility.entityClarity) +
+                      Number(scoreOutput.aiVisibility.aiParseability) +
+                      Number(scoreOutput.aiVisibility.sourceTrustSignals)) /
+                      5) *
+                      100
+                  ),
+                  answerability: Number(scoreOutput.aiVisibility.answerability),
+                  citationReadiness: Number(scoreOutput.aiVisibility.citationReadiness),
+                  entityClarity: Number(scoreOutput.aiVisibility.entityClarity),
+                  aiParseability: Number(scoreOutput.aiVisibility.aiParseability),
+                  brandTrustSignals: Number(scoreOutput.aiVisibility.sourceTrustSignals),
+                  platformReadinessJson: scoreOutput.aiVisibility.platformReadiness || {},
+                },
+              }
+            : undefined,
         },
       });
       snapshotId = snapshot.id;
@@ -194,10 +235,10 @@ async function handler(req: NextRequest, context: AuthenticatedContext) {
           date: new Date(new Date().toISOString().split('T')[0]),
         },
       });
-
-      // Increment cached credit used in Tenant
-      await incrementTenantCredits(context.tenantId);
     }
+
+    // Increment cached credit used in Tenant for every scored content, regardless of snapshot persistence.
+    await incrementTenantCredits(context.tenantId);
 
     // --- Build Response ---
     const responseData = {
@@ -220,7 +261,7 @@ async function handler(req: NextRequest, context: AuthenticatedContext) {
       durationMs: scoreOutput.durationMs,
       semanticAnalysis: scoreOutput.semanticAnalysis || null,
       aiVisibility: scoreOutput.aiVisibility || null,
-      providerEnrichments: (scoreOutput.providerEnrichments || []).map((pe: any) => ({
+      providerEnrichments: (scoreOutput.providerEnrichments || []).map((pe) => ({
         provider: pe.provider,
         sourceType: pe.sourceType,
         providerStatus: pe.providerStatus,
@@ -239,7 +280,7 @@ async function handler(req: NextRequest, context: AuthenticatedContext) {
     };
 
     return successResponse(responseData, scoreOutput.durationMs, context.requestId);
-  } catch (error: any) {
+  } catch (error) {
     logApiError({
       requestId: context.requestId,
       tenantId: context.tenantId,
@@ -253,7 +294,7 @@ async function handler(req: NextRequest, context: AuthenticatedContext) {
       'An unexpected error occurred during content scoring.',
       'INTERNAL_ERROR',
       500,
-      { error: error?.message },
+      { error: error instanceof Error ? error.message : 'Unknown error' },
       context.requestId
     );
   }

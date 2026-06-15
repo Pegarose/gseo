@@ -3,10 +3,9 @@ import {
   ScoreModuleResult, 
   AuditIssue, 
   Recommendation, 
-  ScoreModule, 
-  ScoreOptions,
-  ModuleStatus
+  ScoreModule
 } from './types';
+import { NWEnrichmentResult } from '../providers/neuronwriter';
 import { IndexabilityModule } from './modules/indexability';
 import { TechnicalModule } from './modules/technical';
 import { ContentModule } from './modules/content';
@@ -32,9 +31,10 @@ export interface ScoreOutput {
     bingCopilot: number;
   };
   durationMs: number;
-  semanticAnalysis?: any;
-  aiVisibility?: any;
-  providerEnrichments?: any[];
+  semanticAnalysis?: Record<string, unknown> | null;
+  aiVisibility?: Record<string, unknown> | null;
+  providerEnrichments?: (NWEnrichmentResult & { provider?: string })[];
+  recommendations: Recommendation[];
 }
 
 export class ScoringEngine {
@@ -56,7 +56,7 @@ export class ScoringEngine {
    * Run all scoring modules on a parsed page context.
    */
   async scorePage(context: ScoreContext, startTime: number): Promise<ScoreOutput> {
-    const providerEnrichments: any[] = [];
+    const providerEnrichments: NWEnrichmentResult[] = [];
     if (context.options?.includeNeuronWriter) {
       const nwStart = Date.now();
       const enrichment = await enrichWithNeuronWriter(
@@ -66,13 +66,14 @@ export class ScoringEngine {
         nwStart
       );
       
-      providerEnrichments.push({
+      const nwResult = {
         provider: 'neuronwriter',
         ...enrichment
-      });
+      } as NWEnrichmentResult;
+      providerEnrichments.push(nwResult);
 
       // Attach to context for SemanticModule
-      context.enrichments = [enrichment];
+      context.enrichments = [nwResult as unknown as Record<string, unknown>];
     }
 
     const moduleResults: ScoreModuleResult[] = [];
@@ -169,15 +170,29 @@ export class ScoringEngine {
     // 5. Build Platform Readiness (Normalized values from 0.0 to 1.0)
     const platformReadiness = this.calculatePlatformReadiness(context, standardIssues, experimentalSignals);
 
-    // 6. Generate Quick Wins
+    // 6. Generate Quick Wins & Recommendations
     // Sort issues by estimated effort (low) and impact (high)
-    const quickWins = standardIssues
-      .filter(iss => iss.severity === 'high' || iss.severity === 'critical' || iss.severity === 'medium')
-      .map(iss => ({
-        code: iss.code,
-        title: iss.title,
-        estimatedEffort: (iss.severity === 'critical' || iss.severity === 'high') ? 'low' : 'medium',
-        estimatedImpact: (iss.severity === 'critical' || iss.severity === 'high') ? 'high' : 'medium'
+    const recommendationFromIssue = (iss: AuditIssue): Recommendation => ({
+      code: iss.code,
+      title: iss.title,
+      module: iss.module,
+      severity: iss.severity,
+      recommendation: iss.recommendation,
+      implementationHint: iss.implementationHint,
+      estimatedEffort: (iss.severity === 'critical' || iss.severity === 'high') ? 'low' : 'medium',
+      estimatedImpact: (iss.severity === 'critical' || iss.severity === 'high') ? 'high' : 'medium',
+      confidence: iss.confidence,
+    });
+
+    const recommendations = standardIssues.map(recommendationFromIssue);
+
+    const quickWins = recommendations
+      .filter(rec => rec.severity === 'high' || rec.severity === 'critical' || rec.severity === 'medium')
+      .map(rec => ({
+        code: rec.code,
+        title: rec.title,
+        estimatedEffort: rec.estimatedEffort,
+        estimatedImpact: rec.estimatedImpact,
       }))
       .slice(0, 3); // limit to top 3
 
@@ -194,13 +209,16 @@ export class ScoringEngine {
     const durationMs = Date.now() - startTime;
 
     // Aggregate AI Visibility and Semantic data from modules
-    let semanticAnalysis = null;
-    let aiVisibility = null;
+    let semanticAnalysis: Record<string, unknown> | null = null;
+    let aiVisibility: Record<string, unknown> | null = null;
 
     moduleResults.forEach(mod => {
-      const modData = mod as any;
-      if (modData.semanticAnalysisData) semanticAnalysis = modData.semanticAnalysisData;
-      if (modData.aiVisibilityData) aiVisibility = modData.aiVisibilityData;
+      if ('semanticAnalysisData' in mod && mod.semanticAnalysisData) {
+        semanticAnalysis = mod.semanticAnalysisData;
+      }
+      if ('aiVisibilityData' in mod && mod.aiVisibilityData) {
+        aiVisibility = mod.aiVisibilityData as unknown as Record<string, unknown>;
+      }
     });
 
     return {
@@ -222,7 +240,8 @@ export class ScoringEngine {
       durationMs,
       providerEnrichments,
       semanticAnalysis,
-      aiVisibility
+      aiVisibility,
+      recommendations,
     };
   }
 

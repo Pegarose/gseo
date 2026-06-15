@@ -3,20 +3,34 @@ import { withAuth, AuthenticatedContext } from '@/lib/auth/middleware';
 import { successResponse, errorResponse } from '@/lib/response';
 import { enrichWithNeuronWriter } from '@/lib/providers/neuronwriter';
 import { prisma } from '@/lib/db/prisma';
-import { checkRateLimit, createRateLimitResponse } from '@/lib/utils/rate-limit';
+import { checkRateLimit } from '@/lib/rate-limit';
+import { createRateLimitResponse } from '@/lib/utils/rate-limit';
 import { logApiError } from '@/lib/utils/logger';
+import { checkQuotaLimit, incrementTenantCredits } from '@/lib/auth/quota';
 
 async function handler(req: NextRequest, context: AuthenticatedContext) {
   const startTime = Date.now();
 
   // Rate Limit Check (30 req / hour)
-  const rl = checkRateLimit(context.tenantId, 'nw/enrich', 30, req.headers.get('x-forwarded-for') || 'unknown');
-  if (!rl.success) {
-    return createRateLimitResponse(rl.info, context.requestId);
-  }
+    const rl = await checkRateLimit(context.tenantId, 'nw/enrich', 30, req.headers.get('x-forwarded-for') || 'unknown');
+    if (!rl.success) {
+      return createRateLimitResponse(rl.info, context.requestId);
+    }
 
-  try {
-    const body = await req.json().catch(() => ({}));
+    // --- Quota Limit Check ---
+    const quota = await checkQuotaLimit(context.tenantId);
+    if (!quota.success) {
+      return errorResponse(
+        `AI Credit quota limit exceeded. Current monthly usage: ${quota.used}/${quota.limit}`,
+        'QUOTA_EXCEEDED',
+        403,
+        { used: quota.used, limit: quota.limit },
+        context.requestId
+      );
+    }
+
+    try {
+      const body = await req.json().catch(() => ({}));
     const {
       siteId,
       targetKeyword,
@@ -42,6 +56,18 @@ async function handler(req: NextRequest, context: AuthenticatedContext) {
       targetKeyword || null,
       startTime
     );
+
+    // Track provider enrichment quota usage and increment cached credit counter
+    await prisma.quotaUsage.create({
+      data: {
+        tenantId: context.tenantId,
+        siteId: resolvedSiteId,
+        endpoint: 'nw/enrich',
+        units: 1,
+        date: new Date(new Date().toISOString().split('T')[0]),
+      },
+    });
+    await incrementTenantCredits(context.tenantId);
 
     // Build response — NO credentials, only sourceType
     const responseData = {
@@ -69,7 +95,7 @@ async function handler(req: NextRequest, context: AuthenticatedContext) {
     };
 
     return successResponse(responseData, Date.now() - startTime, context.requestId);
-  } catch (error: any) {
+  } catch (error) {
     logApiError({
       requestId: context.requestId,
       tenantId: context.tenantId,
@@ -83,7 +109,7 @@ async function handler(req: NextRequest, context: AuthenticatedContext) {
       'An unexpected error occurred during NeuronWriter enrichment.',
       'INTERNAL_ERROR',
       500,
-      { error: error?.message },
+      { error: error instanceof Error ? error.message : 'Unknown error' },
       context.requestId
     );
   }

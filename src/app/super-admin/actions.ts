@@ -1,43 +1,26 @@
 'use server';
 
+import { auth } from '@/auth';
 import { prisma } from '@/lib/db/prisma';
-import { revalidatePath } from 'next/cache';
-import { recalculateTenantCredits } from '@/lib/auth/quota';
+import { logAuditEvent } from '@/lib/audit/logger';
 
-// Helper to verify the admin token
-async function verifyAdminAuth() {
-  const { cookies } = await import('next/headers');
-  const cookieStore = await cookies();
-  const token = cookieStore.get('super_admin_token')?.value;
-  const validToken = process.env.SUPER_ADMIN_TOKEN;
-  const isProduction = process.env.NODE_ENV === 'production';
-  
-  let isAuthenticated = false;
-  if (validToken) {
-    isAuthenticated = token === validToken;
-  } else if (!isProduction) {
-    isAuthenticated = token === 'gseo_admin_secret_token';
+export async function requireSuperAdmin() {
+  const session = await auth();
+  if (session?.user.role !== 'super_admin') {
+    throw new Error('Forbidden: Super Admin access required.');
   }
-  
-  if (!isAuthenticated) {
-    throw new Error('Yetkisiz işlem: Super Admin oturumu bulunamadı.');
-  }
+  return session;
 }
 
-// 1. Get Global Super Admin Dashboard Metrics
 export async function getSuperAdminMetrics() {
-  await verifyAdminAuth();
+  await requireSuperAdmin();
 
-  const [totalTenants, totalSites, totalSnapshots, totalCriticalIssues, creditAggregate] = await Promise.all([
+  const [totalTenants, totalSites, totalSnapshots, totalCriticalIssues, totalAiCreditsUsed] = await Promise.all([
     prisma.tenant.count(),
     prisma.site.count(),
     prisma.scoreSnapshot.count(),
     prisma.auditIssue.count({ where: { severity: 'critical' } }),
-    prisma.tenant.aggregate({
-      _sum: {
-        aiCreditUsed: true
-      }
-    })
+    prisma.tenant.aggregate({ _sum: { aiCreditUsed: true } }),
   ]);
 
   return {
@@ -45,163 +28,151 @@ export async function getSuperAdminMetrics() {
     totalSites,
     totalSnapshots,
     totalCriticalIssues,
-    totalAiCreditsUsed: creditAggregate._sum.aiCreditUsed ?? 0
+    totalAiCreditsUsed: totalAiCreditsUsed._sum.aiCreditUsed ?? 0,
   };
 }
 
-// 2. Get All Tenants for Grid
-export async function getSuperAdminTenants() {
-  await verifyAdminAuth();
+export async function getSuperAdminTenants(search?: string, plan?: string) {
+  await requireSuperAdmin();
 
   return prisma.tenant.findMany({
+    where: {
+      ...(search ? { name: { contains: search, mode: 'insensitive' } } : {}),
+      ...(plan ? { plan } : {}),
+    },
+    orderBy: { createdAt: 'desc' },
     include: {
       _count: {
-        select: {
-          users: true,
-          sites: true
-        }
-      }
+        select: { users: true, sites: true, snapshots: true },
+      },
     },
-    orderBy: { createdAt: 'desc' }
   });
 }
 
-// 3. Get Tenant Details
-export async function getSuperAdminTenantDetail(tenantId: string) {
-  await verifyAdminAuth();
+export async function getSuperAdminTenantDetail(id: string) {
+  await requireSuperAdmin();
 
   const tenant = await prisma.tenant.findUnique({
-    where: { id: tenantId },
+    where: { id },
     include: {
-      users: {
-        orderBy: { createdAt: 'desc' }
-      },
+      users: true,
       sites: {
         include: {
           snapshots: {
             orderBy: { createdAt: 'desc' },
             take: 1,
-            select: { finalScore: true, scoreBand: true }
-          }
+            select: { finalScore: true },
+          },
         },
-        orderBy: { createdAt: 'desc' }
       },
       apiKeys: {
-        orderBy: { createdAt: 'desc' }
+        where: { revokedAt: null },
       },
-      integrations: {
-        orderBy: { createdAt: 'desc' }
-      }
-    }
+      integrations: true,
+    },
   });
+
+  if (!tenant) {
+    throw new Error('Tenant not found.');
+  }
 
   return tenant;
 }
 
-// 4. Update Tenant Plan & Quota Override
 export async function updateTenantQuota(
-  tenantId: string, 
-  data: { plan: string; aiCreditLimit: number; supportNotes?: string }
+  tenantId: string,
+  data: { plan?: string; aiCreditLimit?: number; supportNotes?: string }
 ) {
-  await verifyAdminAuth();
+  const session = await requireSuperAdmin();
 
-  const updatedTenant = await prisma.tenant.update({
+  const updated = await prisma.tenant.update({
     where: { id: tenantId },
     data: {
-      plan: data.plan,
-      aiCreditLimit: data.aiCreditLimit,
-      supportNotes: data.supportNotes
-    }
+      ...(data.plan && { plan: data.plan }),
+      ...(typeof data.aiCreditLimit === 'number' && { aiCreditLimit: data.aiCreditLimit }),
+      ...(typeof data.supportNotes === 'string' && { supportNotes: data.supportNotes }),
+    },
   });
 
-  revalidatePath('/super-admin');
-  revalidatePath(`/super-admin/tenants/${tenantId}`);
-  revalidatePath('/dashboard'); // revalidate client dashboard to apply quota overrides instantly
+  await logAuditEvent({
+    tenantId,
+    actorId: session.user.id,
+    actorType: 'user',
+    action: 'tenant.plan_updated',
+    resource: tenantId,
+    metadata: { changes: data },
+  });
 
-  return updatedTenant;
+  return updated;
 }
 
-// 5. Get Provider Health Statuses (Masked Secrets)
+export async function syncTenantCredits(tenantId: string) {
+  const session = await requireSuperAdmin();
+
+  const startOfMonth = new Date();
+  startOfMonth.setDate(1);
+  startOfMonth.setHours(0, 0, 0, 0);
+
+  const usage = await prisma.quotaUsage.aggregate({
+    where: { tenantId, createdAt: { gte: startOfMonth } },
+    _sum: { units: true },
+  });
+
+  const aiCreditUsed = usage._sum.units ?? 0;
+
+  await prisma.tenant.update({
+    where: { id: tenantId },
+    data: { aiCreditUsed },
+  });
+
+  await logAuditEvent({
+    tenantId,
+    actorId: session.user.id,
+    actorType: 'user',
+    action: 'tenant.quota_synced',
+    resource: tenantId,
+    metadata: { aiCreditUsed },
+  });
+
+  return { success: true, aiCreditUsed };
+}
+
 export async function getProviderHealth() {
-  await verifyAdminAuth();
+  await requireSuperAdmin();
 
-  const nwKey = process.env.NEURONWRITER_API_KEY;
-  const psKey = process.env.PAGESPEED_API_KEY;
-
-  const maskKey = (key?: string) => {
-    if (!key) return 'Tanımlanmadı';
-    if (key.length <= 8) return '••••••••';
-    return `${key.substring(0, 4)}••••••••${key.substring(key.length - 4)}`;
-  };
-
+  // Placeholder provider health data. In production these would come from real health checks.
   return [
-    {
-      id: 'neuronwriter',
-      name: 'Semantic Content Analyzer API Provider',
-      status: nwKey ? 'active' : 'offline',
-      maskedKey: maskKey(nwKey),
-      endpoint: 'https://api.neuronwriter.com/v1 (Mocked Routing)',
-      lastChecked: new Date()
-    },
-    {
-      id: 'pagespeed',
-      name: 'Google PageSpeed Insights API',
-      status: psKey ? 'active' : 'offline',
-      maskedKey: maskKey(psKey),
-      endpoint: 'https://www.googleapis.com/pagespeedonline/v5',
-      lastChecked: new Date()
-    }
+    { provider: 'NeuronWriter', status: 'operational', latencyMs: 245, lastCheckedAt: new Date().toISOString() },
+    { provider: 'PageSpeed', status: 'operational', latencyMs: 120, lastCheckedAt: new Date().toISOString() },
   ];
 }
 
-// 6. Get Global Usage Statistics
 export async function getGlobalUsageStats() {
-  await verifyAdminAuth();
+  await requireSuperAdmin();
 
-  const usages = await prisma.quotaUsage.groupBy({
+  const last30Days = new Date();
+  last30Days.setDate(last30Days.getDate() - 30);
+
+  const usage = await prisma.quotaUsage.groupBy({
     by: ['endpoint'],
-    _sum: {
-      units: true
-    },
-    _count: {
-      id: true
-    }
+    where: { createdAt: { gte: last30Days } },
+    _sum: { units: true },
+    _count: { id: true },
   });
 
-  return usages.map(u => ({
+  return usage.map((u) => ({
     endpoint: u.endpoint,
-    totalCalls: u._count.id,
-    totalUnits: u._sum.units ?? 0
+    totalUnits: u._sum.units ?? 0,
+    requestCount: u._count.id,
   }));
 }
 
-// 7. Get System Overview Stats (Rate limit hits & Plugin version summaries)
 export async function getSystemOverview() {
-  await verifyAdminAuth();
+  await requireSuperAdmin();
 
-  // Simple mocked system stats for the MVP console
+  // Placeholder until rate limit events are persisted
   return {
-    rateLimitHits: [
-      { path: '/api/v1/score/url', count: 12, lastHit: new Date(Date.now() - 3600000) },
-      { path: '/api/v1/score/content', count: 5, lastHit: new Date(Date.now() - 7200000) },
-      { path: '/api/v1/semantic/analyze', count: 2, lastHit: new Date(Date.now() - 14400000) }
-    ],
-    pluginVersions: [
-      { version: 'WordPress Plugin v1.0.0', count: 8, percentage: 80 },
-      { version: 'Next.js SDK v0.8.2', count: 2, percentage: 20 }
-    ]
+    rateLimitHits: [] as { tenantId: string; endpoint: string; count: number; lastHitAt: string }[],
+    pluginVersions: [] as { version: string; count: number }[],
   };
-}
-
-// 8. Manual Sync / Recalculate Tenant Credits
-export async function syncTenantCredits(tenantId: string) {
-  await verifyAdminAuth();
-  
-  const updatedUsed = await recalculateTenantCredits(tenantId);
-  
-  revalidatePath('/super-admin');
-  revalidatePath(`/super-admin/tenants/${tenantId}`);
-  revalidatePath('/dashboard');
-  
-  return { success: true, aiCreditUsed: updatedUsed };
 }

@@ -1,19 +1,15 @@
 import { PrismaClient } from '@prisma/client';
-import { generateApiKeyString, hashApiKey } from '../src/lib/auth/keys';
+import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
 async function main() {
   console.log('Seeding database...');
 
-  // 1. Create or get default GMedya Tenant
+  // Upsert the main dogfooding tenant
   const tenant = await prisma.tenant.upsert({
     where: { slug: 'gmedya' },
-    update: {
-      aiCreditLimit: 500,
-      aiCreditUsed: 45,
-      supportNotes: 'GMedya internal dogfooding and testing tenant.',
-    },
+    update: {},
     create: {
       name: 'GMedya Dogfooding',
       slug: 'gmedya',
@@ -23,69 +19,66 @@ async function main() {
       supportNotes: 'GMedya internal dogfooding and testing tenant.',
     },
   });
-  console.log(`Tenant verified: ${tenant.name} (${tenant.id})`);
 
-  // 2. Create or get default admin user
-  const user = await prisma.user.upsert({
+  // Upsert a default super admin user
+  const adminPassword = await bcrypt.hash('GSeoSuite2026!', 10);
+  await prisma.user.upsert({
+    where: { email: 'admin@gmedya.com' },
+    update: {},
+    create: {
+      email: 'admin@gmedya.com',
+      name: 'Super Admin',
+      role: 'super_admin',
+      passwordHash: adminPassword,
+    },
+  });
+
+  // Upsert a default tenant user
+  const editorPassword = await bcrypt.hash('GSeoSuite2026!', 10);
+  await prisma.user.upsert({
     where: { email: 'seo@gmedya.com' },
     update: {},
     create: {
-      tenantId: tenant.id,
       email: 'seo@gmedya.com',
-      name: 'GMedya SEO Admin',
-      role: 'admin',
-    },
-  });
-  console.log(`User verified: ${user.email}`);
-
-  // 3. Check if we already have an active API Key
-  const existingKey = await prisma.apiKey.findFirst({
-    where: {
+      name: 'SEO Editor',
+      role: 'editor',
       tenantId: tenant.id,
-      revokedAt: null,
+      passwordHash: editorPassword,
     },
   });
 
-  if (existingKey) {
-    console.log(`Active API key with prefix '${existingKey.keyPrefix}' already exists.`);
-    console.log('Skipping API key creation to avoid duplicates.');
-  } else {
-    // Generate new API key
-    const rawKey = generateApiKeyString('live');
-    const keyHash = hashApiKey(rawKey);
-    const keyPrefix = rawKey.slice(0, 14);
+  console.log(`Tenant verified: ${tenant.name} (${tenant.id})`);
+  console.log('User verified: seo@gmedya.com');
+
+  // Upsert a default API key for dogfooding
+  const existingKey = await prisma.apiKey.findFirst({
+    where: { tenantId: tenant.id, revokedAt: null },
+  });
+
+  if (!existingKey) {
+    const crypto = await import('crypto');
+    const rawKey = 'gseo_live_269c' + crypto.randomBytes(16).toString('hex');
+    const hashed = crypto.createHash('sha256').update(rawKey).digest('hex');
 
     await prisma.apiKey.create({
       data: {
         tenantId: tenant.id,
-        name: 'GMedya Default Key',
-        keyHash,
-        keyPrefix,
-        scopes: [
-          'score:read',
-          'site:read',
-          'site:write',
-          'semantic:read',
-          'links:read',
-          'ai:read',
-          'quota:read',
-          'webhook:write',
-        ],
+        name: 'Dogfood Key',
+        keyPrefix: rawKey.substring(0, 12),
+        keyHash: hashed,
+        scopes: ['score:read', 'site:read', 'site:write', 'quota:read', 'semantic:read', 'ai:read', 'links:read', 'webhook:write'],
       },
     });
-
-    console.log('\n============================================================');
-    console.log('SeoSuite Database Seeded Successfully!');
-    console.log(`Tenant: ${tenant.name}`);
-    console.log(`Created Default API Key: ${rawKey}`);
-    console.log('IMPORTANT: Save this key. It will not be shown again.');
-    console.log('============================================================\n');
+    console.log(`Created API key: ${rawKey.substring(0, 16)}...`);
+  } else {
+    console.log(`Active API key with prefix '${existingKey.keyPrefix}' already exists.`);
+    console.log('Skipping API key creation to avoid duplicates.');
   }
 }
 
 main()
   .catch((e) => {
-    console.error('Error during seed:', e);
+    console.error(e);
     process.exit(1);
   })
   .finally(async () => {

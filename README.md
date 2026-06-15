@@ -67,10 +67,10 @@ Ensure your `.env` contains:
 ```env
 DATABASE_URL="postgresql://seosuite_user:seosuite_password@localhost:5432/seosuite_db?schema=public"
 NODE_ENV="development"
-APP_URL="http://localhost:3000"
-GSEO_API_BASE_URL="http://localhost:3000/api/v1"
-API_KEY_SECRET="seosuite_local_api_key_secret_key_minimum_32_characters"
-ENCRYPTION_SECRET="00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff"
+APP_URL="http://localhost:3001"
+GSEO_API_BASE_URL="http://localhost:3001/api/v1"
+SUPER_ADMIN_TOKEN="gseo_admin_secret_token"
+DASHBOARD_MOCK_TENANT_ID="gmedya"
 NEURONWRITER_API_KEY="local_test_neuronwriter_fallback_key"
 ```
 
@@ -92,7 +92,7 @@ Start the dev server:
 ```bash
 npm run dev
 ```
-The API is now available locally at: `http://localhost:3000/api/v1`
+The API is now available locally at: `http://localhost:3001/api/v1`
 
 ---
 
@@ -130,10 +130,10 @@ All responses utilize standard JSON envelopes:
 ### Testing the Endpoints
 To test the health route:
 ```bash
-curl http://localhost:3000/api/v1/health
+curl http://localhost:3001/api/v1/health
 ```
 
 To test the authenticated profile route:
 ```bash
-curl -H "Authorization: Bearer YOUR_GENERATED_API_KEY" http://localhost:3000/api/v1/auth/me
+curl -H "Authorization: Bearer YOUR_GENERATED_API_KEY" http://localhost:3001/api/v1/auth/me
 ```

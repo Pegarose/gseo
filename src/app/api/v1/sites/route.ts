@@ -2,7 +2,8 @@ import { NextRequest } from 'next/server';
 import { withAuth, AuthenticatedContext } from '@/lib/auth/middleware';
 import { successResponse, errorResponse } from '@/lib/response';
 import { prisma } from '@/lib/db/prisma';
-import { checkRateLimit, createRateLimitResponse } from '@/lib/utils/rate-limit';
+import { checkRateLimit } from '@/lib/rate-limit';
+import { createRateLimitResponse } from '@/lib/utils/rate-limit';
 import { logApiError } from '@/lib/utils/logger';
 
 /**
@@ -12,7 +13,7 @@ import { logApiError } from '@/lib/utils/logger';
  */
 async function getHandler(req: NextRequest, context: AuthenticatedContext) {
   const startTime = Date.now();
-  const rl = checkRateLimit(context.tenantId, 'sites', 120, req.headers.get('x-forwarded-for') || 'unknown');
+  const rl = await checkRateLimit(context.tenantId, 'sites', 120, req.headers.get('x-forwarded-for') || 'unknown');
   if (!rl.success) {
     return createRateLimitResponse(rl.info, context.requestId);
   }
@@ -68,7 +69,7 @@ async function getHandler(req: NextRequest, context: AuthenticatedContext) {
  */
 async function postHandler(req: NextRequest, context: AuthenticatedContext) {
   const startTime = Date.now();
-  const rl = checkRateLimit(context.tenantId, 'sites', 120, req.headers.get('x-forwarded-for') || 'unknown');
+  const rl = await checkRateLimit(context.tenantId, 'sites', 120, req.headers.get('x-forwarded-for') || 'unknown');
   if (!rl.success) {
     return createRateLimitResponse(rl.info, context.requestId);
   }

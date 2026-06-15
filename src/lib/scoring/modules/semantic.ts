@@ -154,14 +154,14 @@ export class SemanticModule implements ScoreModule {
         issues,
         recommendations: [],
         // Extra analysis attached for response shape
-        ...(this.buildSemanticAnalysis({
+        semanticAnalysisData: this.buildSemanticAnalysis({
           targetKeywordProvided: true,
           inferredPrimaryTopic: null,
           topicConfidence: null,
           semanticCoverageScore,
           missingTopics: issues.filter(i => i.severity === 'high' || i.severity === 'medium').map(i => i.code),
-          recommendedHeadings: context.enrichments?.[0]?.recommendedHeadings || [],
-        }) as any),
+          recommendedHeadings: (context.enrichments?.[0]?.recommendedHeadings as string[] | undefined) || [],
+        }),
       };
     }
 
@@ -219,14 +219,14 @@ export class SemanticModule implements ScoreModule {
       status: this.getStatus(score),
       issues,
       recommendations: [],
-      ...(this.buildSemanticAnalysis({
+      semanticAnalysisData: this.buildSemanticAnalysis({
         targetKeywordProvided: false,
         inferredPrimaryTopic,
         topicConfidence,
         semanticCoverageScore,
         missingTopics: [],
         recommendedHeadings: [],
-      }) as any),
+      }),
     };
   }
 
@@ -275,8 +275,8 @@ export class SemanticModule implements ScoreModule {
     semanticCoverageScore: number;
     missingTopics: string[];
     recommendedHeadings: string[];
-  }) {
-    return { semanticAnalysisData: data };
+  }): Record<string, unknown> {
+    return data;
   }
 
   private getStatus(score: number): ScoreModuleResult['status'] {

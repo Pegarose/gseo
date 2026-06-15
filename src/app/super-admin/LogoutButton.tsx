@@ -1,21 +1,21 @@
 'use client';
 
-import React from 'react';
+import { signOut } from 'next-auth/react';
 import { LogOut } from 'lucide-react';
 
 export default function LogoutButton() {
-  const handleLogout = () => {
-    document.cookie = "super_admin_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
-    window.location.reload();
+  const handleLogout = async () => {
+    document.cookie = 'super_admin_token=; path=/; max-age=0';
+    await signOut({ callbackUrl: '/login' });
   };
 
   return (
-    <button 
+    <button
       onClick={handleLogout}
-      className="flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-medium text-red-400 hover:bg-red-950/30 hover:text-red-300 transition-colors w-full text-left"
+      className="flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-medium text-slate-400 hover:bg-slate-800 hover:text-white transition-colors w-full"
     >
       <LogOut className="w-4 h-4" />
-      Oturumu Kapat
+      Çıkış Yap
     </button>
   );
 }

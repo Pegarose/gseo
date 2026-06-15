@@ -1,28 +1,35 @@
 'use server';
 
+import { auth } from '@/auth';
 import { prisma } from '@/lib/db/prisma';
 
 // 1. Authentication Helper
 export async function getDashboardTenantContext() {
-  if (process.env.NODE_ENV !== 'development' && process.env.DASHBOARD_DEMO_MODE !== 'true') {
-    throw new Error('Dashboard is only available in demo/development mode currently.');
-  }
+  const session = await auth();
 
-  let tenantId = process.env.DASHBOARD_MOCK_TENANT_ID;
+  // Impersonation support: super_admin may view a tenant dashboard read-only
+  const impersonatedTenantId = session?.user.impersonatedTenantId;
+  const effectiveTenantId = impersonatedTenantId ?? session?.user.tenantId;
 
-  if (!tenantId) {
-    // Fallback to the seed tenant if no mock ID is provided in demo mode
-    const seedTenant = await prisma.tenant.findUnique({
-      where: { slug: 'gmedya' }
-    });
-    
-    if (!seedTenant) {
-      throw new Error('No mock tenant found. Please run Prisma seed or provide DASHBOARD_MOCK_TENANT_ID.');
+  if (!effectiveTenantId) {
+    // Demo mode fallback for local development
+    if (process.env.NODE_ENV === 'development' || process.env.DASHBOARD_DEMO_MODE === 'true') {
+      const seedTenant = await prisma.tenant.findUnique({
+        where: { slug: 'gmedya' }
+      });
+      if (seedTenant) {
+        return { tenantId: seedTenant.id, readOnly: !!impersonatedTenantId };
+      }
     }
-    tenantId = seedTenant.id;
+    throw new Error('No tenant associated with this account.');
   }
 
-  return { tenantId };
+  const tenant = await prisma.tenant.findUnique({ where: { id: effectiveTenantId } });
+  if (!tenant) {
+    throw new Error('Tenant not found.');
+  }
+
+  return { tenantId: tenant.id, readOnly: !!impersonatedTenantId };
 }
 
 // 2. Overview Page Metrics
@@ -148,7 +155,7 @@ export async function getQuickWins(take = 10) {
 // 3. Recent Audits
 export async function getRecentAudits(take = 5) {
   const { tenantId } = await getDashboardTenantContext();
-  
+
   return prisma.scoreSnapshot.findMany({
     where: { tenantId },
     orderBy: { createdAt: 'desc' },
@@ -164,11 +171,11 @@ export async function getRecentAudits(take = 5) {
 // 4. Top Critical Issues
 export async function getTopIssues() {
   const { tenantId } = await getDashboardTenantContext();
-  
+
   // Group by issue code to find the most frequent critical/high issues
   const issuesGrouped = await prisma.auditIssue.groupBy({
     by: ['code', 'title', 'severity'],
-    where: { 
+    where: {
       tenantId,
       severity: { in: ['critical', 'high'] }
     },
@@ -188,7 +195,7 @@ export async function getTopIssues() {
 // 5. List Sites
 export async function getSites() {
   const { tenantId } = await getDashboardTenantContext();
-  
+
   return prisma.site.findMany({
     where: { tenantId },
     include: {
@@ -205,7 +212,7 @@ export async function getSites() {
 // 6. Site Details
 export async function getSiteDetail(siteId: string) {
   const { tenantId } = await getDashboardTenantContext();
-  
+
   return prisma.site.findFirst({
     where: { id: siteId, tenantId },
     include: {
@@ -220,7 +227,7 @@ export async function getSiteDetail(siteId: string) {
 // 7. AI Visibility Overview
 export async function getAiVisibilityOverview() {
   const { tenantId } = await getDashboardTenantContext();
-  
+
   const checks = await prisma.aiVisibilityCheck.findMany({
     where: { tenantId },
     include: {
@@ -275,7 +282,7 @@ export async function getAiVisibilityOverview() {
 // 8. Settings Summary
 export async function getSettingsSummary() {
   const { tenantId } = await getDashboardTenantContext();
-  
+
   return prisma.tenant.findUnique({
     where: { id: tenantId },
     select: {
