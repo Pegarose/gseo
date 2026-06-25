@@ -1,0 +1,12 @@
+category: Backend
+interface:
+  display_name: Redis Best Practices
+  short_description: Optimize Redis data structures, queries, and caching.
+  icon_dark: './assets/icon-dark.png'
+  icon_light: './assets/icon-light.png'
+  default_prompt: Help me optimize my Redis usage.
+  label:
+    - redis
+    - database
+    - caching
+    - performance

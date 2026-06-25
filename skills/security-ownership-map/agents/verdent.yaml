@@ -1,0 +1,12 @@
+category: Security
+interface:
+  display_name: Security Ownership Map
+  short_description: Analyze git repos for security ownership and bus factor
+  icon_dark: ./assets/icon-dark.png
+  icon_light: ./assets/icon-light.png
+  default_prompt: Analyze this repository's security ownership and bus factor from
+    git history.
+  label:
+  - security
+  - git
+  - analysis

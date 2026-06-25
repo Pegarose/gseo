@@ -1,0 +1,12 @@
+category: Media & Files
+interface:
+  display_name: Text to Speech
+  short_description: Convert text to speech via OpenAI Audio API
+  icon_dark: ./assets/icon-dark.png
+  icon_light: ./assets/icon-light.png
+  default_prompt: Convert this text to speech using the OpenAI Audio API.
+  label:
+  - ai
+  - text-to-speech
+  - openai
+  - accessibility

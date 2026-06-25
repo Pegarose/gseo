@@ -1,0 +1,12 @@
+category: Productivity
+interface:
+  display_name: Delivery Acceptance
+  short_description: Verify deliverables against acceptance criteria and quality gates.
+  icon_dark: './assets/icon-dark.png'
+  icon_light: './assets/icon-light.png'
+  default_prompt: Help me run acceptance checks on this deliverable.
+  label:
+    - acceptance
+    - qa
+    - delivery
+    - verification

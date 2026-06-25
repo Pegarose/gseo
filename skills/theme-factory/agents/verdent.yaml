@@ -1,0 +1,11 @@
+category: Design
+interface:
+  display_name: Theme Factory
+  short_description: Apply pre-set or custom themes to slides, docs, and pages
+  icon_dark: ./assets/icon-dark.png
+  icon_light: ./assets/icon-light.png
+  default_prompt: Apply a theme to my document or presentation.
+  label:
+  - creative
+  - design
+  - theming

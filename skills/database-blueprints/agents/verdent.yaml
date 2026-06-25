@@ -1,0 +1,13 @@
+category: Backend
+interface:
+  display_name: Database Blueprints
+  short_description: Design and document database schemas, tables, and relationships.
+  icon_dark: './assets/icon-dark.png'
+  icon_light: './assets/icon-light.png'
+  default_prompt: Help me design a database schema.
+  label:
+    - database
+    - schema
+    - sql
+    - postgres
+    - mysql

@@ -1,0 +1,11 @@
+category: Productivity
+interface:
+  display_name: Firecrawl Web Scraper
+  short_description: Search the web, scrape pages, and crawl sites.
+  icon_dark: './assets/icon-dark.png'
+  icon_light: './assets/icon-light.png'
+  default_prompt: Search the web and scrape this page for me.
+  label:
+    - web-scraping
+    - search
+    - crawling

@@ -1,0 +1,69 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://capint.dev/schemas/execution-intent.v1.json",
+  "title": "CapInt Execution Intent",
+  "type": "object",
+  "required": [
+    "intent",
+    "capability",
+    "resolution",
+    "memory",
+    "plan",
+    "confirm",
+    "confirm_question",
+    "confirm_options",
+    "confirm_default_option",
+    "fallback"
+  ],
+  "properties": {
+    "intent": { "type": "string" },
+    "capability": { "type": "string" },
+    "resolution": { "type": "string" },
+    "memory": { "enum": ["none", "optional", "required"] },
+    "plan": { "enum": ["auto", "confirm", "override"] },
+    "confirm": {
+      "type": "object",
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "mode": { "type": "string" },
+        "prompt": { "type": ["string", "null"] },
+        "options": { "type": "array" },
+        "default_option": { "type": ["string", "null"] }
+      }
+    },
+    "confirm_question": { "type": ["string", "null"] },
+    "confirm_options": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "label"],
+        "properties": {
+          "id": { "type": "string" },
+          "label": { "type": "string" }
+        }
+      }
+    },
+    "confirm_default_option": { "type": ["string", "null"] },
+    "fallback": { "type": ["object", "null"] },
+    "verification_required": { "type": "boolean" },
+    "verification_hints": { "type": "array", "items": { "type": "string" } },
+    "verification_profile": { "type": "string" },
+    "route_explain": { "type": "object" },
+    "explanation": { "$ref": "explanation.v2.json" },
+    "provider_activation": { "type": ["object", "null"] },
+    "context_pack": { "type": ["object", "null"] },
+    "orchestration": { "type": ["object", "null"] },
+    "resolution_status": { "type": "string" },
+    "resolution_hint": { "type": "string" },
+    "workspace_boundary": {
+      "type": "object",
+      "properties": {
+        "violated": { "type": "boolean" },
+        "suspicious_paths": { "type": "array", "items": { "type": "string" } },
+        "override_hint": { "type": ["string", "null"] }
+      }
+    },
+    "overlay_error": { "type": "string" },
+    "local_adapters": { "type": "object" }
+  }
+}

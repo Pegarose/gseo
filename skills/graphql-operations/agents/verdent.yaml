@@ -1,0 +1,11 @@
+category: Backend
+interface:
+  display_name: GraphQL Operations
+  short_description: Write optimized GraphQL queries, mutations, and fragments.
+  icon_dark: './assets/icon-dark.png'
+  icon_light: './assets/icon-light.png'
+  default_prompt: Help me write GraphQL operations.
+  label:
+    - graphql
+    - api
+    - frontend

@@ -1,0 +1,48 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://capint.dev/schemas/explanation.v1.json",
+  "title": "CapInt Route Explanation",
+  "type": "object",
+  "required": [
+    "task_type_id",
+    "matched_keywords",
+    "winner",
+    "files_to_read",
+    "reason_summary",
+    "alternatives_considered"
+  ],
+  "properties": {
+    "task_type_id": { "type": ["string", "null"] },
+    "matched_keywords": { "type": "array", "items": { "type": "string" } },
+    "winner": {
+      "type": ["object", "null"],
+      "properties": {
+        "type": { "type": "string" },
+        "resource": { "type": "string" }
+      }
+    },
+    "files_to_read": { "type": "array", "items": { "type": "string" } },
+    "reason_summary": { "type": "string" },
+    "alternatives_considered": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "resource": { "type": "string" },
+          "type": { "type": "string" },
+          "confidence": { "type": ["number", "null"] }
+        }
+      }
+    },
+    "resolver_order": { "type": "array", "items": { "type": "string" } },
+    "files_intended": { "type": "array", "items": { "type": "string" } },
+    "workspace_boundary": {
+      "type": "object",
+      "properties": {
+        "violated": { "type": "boolean" },
+        "suspicious_paths": { "type": "array", "items": { "type": "string" } },
+        "override_hint": { "type": ["string", "null"] }
+      }
+    }
+  }
+}

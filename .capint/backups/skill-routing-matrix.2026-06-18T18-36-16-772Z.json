@@ -1,0 +1,211 @@
+{
+  "schema_version": "1.3",
+  "updated_at": "2026-05-30",
+  "resolver_order": ["exact_keyword", "domain_rules", "classification_default"],
+  "fallback_policy": {
+    "ambiguous_default_capability": "request-clarification",
+    "override_hint": "/workflow"
+  },
+  "execution_policy_defaults": {
+    "light": "auto",
+    "medium": "confirm",
+    "heavy": "confirm"
+  },
+  "clarification_policy": {
+    "mode": "adaptive",
+    "max_options": 3,
+    "default_option": "apply_now"
+  },
+  "verification_defaults": {
+    "require_on_light": false,
+    "profile": "standard"
+  },
+  "provider_activation_policy": {
+    "memory_providers": {
+      "default": "off",
+      "require_doctor_pass": true,
+      "allow_on_light": false,
+      "high_risk_capabilities": ["incident-response", "threat-modeling", "memory-retrieval"]
+    },
+    "graph_providers": {
+      "default": "off",
+      "require_doctor_pass": true,
+      "allow_on_light": false,
+      "high_risk_capabilities": ["memory-retrieval"]
+    }
+  },
+  "capability_chains": [
+    {
+      "from_capability": "systematic-debugging",
+      "then_capability": "refactor-simplify",
+      "when": "plan_first"
+    },
+    {
+      "from_capability": "refactor-simplify",
+      "then_capability": "verification",
+      "when": "after_apply"
+    }
+  ],
+  "classification": {
+    "security_override_min": "medium",
+    "ambiguous_default": "medium",
+    "multi_item_bundle_min": "medium",
+    "file_thresholds": { "medium": 3, "heavy": 10 },
+    "security_keywords": ["auth", "login", "session", "payment", "secret", "credential", ".env"],
+    "heavy_keywords": ["new module", "architecture", "mimari", "schema design", "from scratch"],
+    "medium_keywords": ["migration", "endpoint", "refactor", "unit test", "todo", "api"]
+  },
+  "rules_domain_map": {
+    "rules/security.md": {
+      "skills": ["security-and-hardening"],
+      "weight_min": "medium"
+    },
+    "rules/testing.md": {
+      "skills": ["test-driven-development"],
+      "weight_min": "medium"
+    }
+  },
+  "task_types": [
+    {
+      "id": "skill_route",
+      "capability": "capability-routing",
+      "phase": "meta",
+      "orchestration_pattern": "supervisor",
+      "keywords": ["which skill", "hangi skill", "route task", "capability"],
+      "weight_default": "light",
+      "requires_memory": "none",
+      "default_execution_policy": "confirm",
+      "providers": [
+        { "name": "skill", "type": "skill", "resource": "task-skill-router", "confidence_base": 0.91 }
+      ],
+      "skills": ["task-skill-router", "capint-skill-gateway"],
+      "workflow": null
+    },
+    {
+      "id": "debug",
+      "capability": "systematic-debugging",
+      "phase": "build",
+      "orchestration_pattern": "producer_reviewer",
+      "keywords": ["bug", "error", "broken", "fix", "hata", "çalışmıyor"],
+      "weight_default": "medium",
+      "requires_memory": "optional",
+      "default_execution_policy": "confirm",
+      "verification_profile": "debug",
+      "providers": [
+        { "name": "workflow", "type": "workflow", "resource": "forge", "confidence_base": 0.84 },
+        { "name": "skill", "type": "skill", "resource": "systematic-debugging", "confidence_base": 0.8 }
+      ],
+      "skills": ["systematic-debugging"],
+      "workflow": "/forge"
+    },
+    {
+      "id": "i18n",
+      "capability": "localization-hub",
+      "phase": "build",
+      "orchestration_pattern": "expert_pool",
+      "keywords": ["i18n", "localization", "çeviri", "lang file", "translation hub"],
+      "weight_default": "medium",
+      "requires_memory": "optional",
+      "default_execution_policy": "confirm",
+      "providers": [
+        { "name": "skill", "type": "skill", "resource": "localization-hub", "confidence_base": 0.9 }
+      ],
+      "skills": ["localization-hub"],
+      "workflow": null
+    },
+    {
+      "id": "refactor",
+      "capability": "refactor-simplify",
+      "phase": "build",
+      "orchestration_pattern": "pipeline",
+      "keywords": ["refactor", "clean up", "simplify", "code smell"],
+      "weight_default": "medium",
+      "requires_memory": "optional",
+      "default_execution_policy": "confirm",
+      "verification_profile": "refactor",
+      "providers": [
+        { "name": "workflow", "type": "workflow", "resource": "forge", "confidence_base": 0.79 },
+        { "name": "skill", "type": "skill", "resource": "refactor", "confidence_base": 0.77 }
+      ],
+      "skills": ["refactor"],
+      "workflow": "/forge"
+    },
+    {
+      "id": "memory_lookup",
+      "capability": "memory-retrieval",
+      "phase": "analyze",
+      "orchestration_pattern": "expert_pool",
+      "keywords": ["memory lookup", "what did we decide", "geçen karar", "history"],
+      "weight_default": "light",
+      "requires_memory": "required",
+      "default_execution_policy": "confirm",
+      "verification_required": true,
+      "providers": [
+        { "name": "skill", "type": "skill", "resource": "context-memory-bridge", "confidence_base": 0.86 }
+      ],
+      "skills": ["context-memory-bridge"],
+      "workflow": null
+    },
+    {
+      "id": "write_prd",
+      "capability": "spec-authoring",
+      "phase": "plan",
+      "orchestration_pattern": "pipeline",
+      "keywords": ["prd", "requirements", "user story", "gereksinim", "spec yaz", "product requirements"],
+      "weight_default": "medium",
+      "requires_memory": "optional",
+      "default_execution_policy": "confirm",
+      "providers": [
+        { "name": "workflow", "type": "workflow", "resource": "genesis", "confidence_base": 0.83 },
+        { "name": "skill", "type": "skill", "resource": "prd", "confidence_base": 0.8 }
+      ],
+      "skills": ["prd", "spec-writer", "brainstorming"],
+      "workflow": "/genesis"
+    },
+    {
+      "id": "workflow_override",
+      "capability": "workflow-override",
+      "phase": "meta",
+      "orchestration_pattern": "supervisor",
+      "keywords": ["/workflow", "/skill", "override"],
+      "weight_default": "light",
+      "requires_memory": "none",
+      "default_execution_policy": "override",
+      "providers": [
+        { "name": "skill", "type": "skill", "resource": "task-skill-router", "confidence_base": 0.88 }
+      ],
+      "skills": ["task-skill-router"],
+      "workflow": null
+    },
+    {
+      "id": "ui_development",
+      "capability": "frontend-design",
+      "phase": "build",
+      "orchestration_pattern": "pipeline",
+      "keywords": ["sayfa yap", "sayfası yapalım", "arayüz", "dashboard", "css", "layout", "design", "frontend", "ui", "tasarım"],
+      "weight_default": "medium",
+      "requires_memory": "optional",
+      "default_execution_policy": "confirm",
+      "providers": [
+        { "name": "skill", "type": "skill", "resource": "frontend-design-pro", "confidence_base": 0.85 }
+      ],
+      "skills": ["frontend-design-pro", "impeccable"],
+      "workflow": null
+    },
+    {
+      "id": "workspace_scope",
+      "capability": "workspace-boundary",
+      "phase": "meta",
+      "orchestration_pattern": "supervisor",
+      "keywords": ["başka repo", "other repo", "cross repo", "dış proje", "workspace dışı", "outside workspace", "wrong repo"],
+      "weight_default": "medium",
+      "requires_memory": "none",
+      "default_execution_policy": "override",
+      "providers": [
+        { "name": "skill", "type": "skill", "resource": "capint-skill-gateway", "confidence_base": 0.92 }
+      ],
+      "skills": ["capint-skill-gateway"],
+      "workflow": null
+    }
+  ]
+}

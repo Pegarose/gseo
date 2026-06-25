@@ -1,0 +1,62 @@
+
+> seosuite@0.1.0 build
+> next build
+
+Ôû▓ Next.js 16.2.9 (Turbopack)
+- Environments: .env
+
+ÔÜá The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+  Creating an optimized production build ...
+Ô£ô Compiled successfully in 3.5s
+  Running TypeScript ...
+  Finished TypeScript in 2.9s ...
+  Collecting page data using 31 workers ...
+  Generating static pages using 31 workers (0/20) ...
+  Generating static pages using 31 workers (5/20) 
+  Generating static pages using 31 workers (10/20) 
+  Generating static pages using 31 workers (15/20) 
+Ô£ô Generating static pages using 31 workers (20/20) in 372ms
+  Finalizing page optimization ...
+
+Route (app)
+Ôöî Ôùï /
+Ôö£ Ôùï /_not-found
+Ôö£ ãÆ /admin/dashboard
+Ôö£ ãÆ /api/auth/session
+Ôö£ ãÆ /api/v1/ai-visibility/check
+Ôö£ ãÆ /api/v1/auth/me
+Ôö£ ãÆ /api/v1/billing/checkout
+Ôö£ ãÆ /api/v1/billing/webhook
+Ôö£ ãÆ /api/v1/health
+Ôö£ ãÆ /api/v1/internal-links/suggest
+Ôö£ ãÆ /api/v1/nw/enrich
+Ôö£ ãÆ /api/v1/quota
+Ôö£ ãÆ /api/v1/score/content
+Ôö£ ãÆ /api/v1/score/url
+Ôö£ ãÆ /api/v1/semantic/analyze
+Ôö£ ãÆ /api/v1/sites
+Ôö£ ãÆ /api/v1/sites/[siteId]/crawl
+Ôö£ ãÆ /api/v1/sites/[siteId]/scores
+Ôö£ ãÆ /api/v1/webhooks
+Ôö£ ãÆ /dashboard
+Ôö£ ãÆ /dashboard/ai-visibility
+Ôö£ ãÆ /dashboard/settings
+Ôö£ ãÆ /dashboard/sites
+Ôö£ ãÆ /dashboard/sites/[id]
+Ôö£ Ôùï /dev/example
+Ôö£ Ôùï /login
+Ôö£ ãÆ /super-admin
+Ôö£ ãÆ /super-admin/audit-logs
+Ôö£ ãÆ /super-admin/providers
+Ôö£ ãÆ /super-admin/system
+Ôö£ ãÆ /super-admin/system/metrics
+Ôö£ ãÆ /super-admin/tenants
+Ôö£ ãÆ /super-admin/tenants/[id]
+Ôöö ãÆ /super-admin/usage
+
+
+ãÆ Proxy (Middleware)
+
+Ôùï  (Static)   prerendered as static content
+ãÆ  (Dynamic)  server-rendered on demand
+

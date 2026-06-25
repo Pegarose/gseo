@@ -1,0 +1,11 @@
+category: Media & Files
+interface:
+  display_name: Image Generation
+  short_description: Generate and edit images via OpenAI Image API
+  icon_dark: ./assets/icon-dark.png
+  icon_light: ./assets/icon-light.png
+  default_prompt: Generate an image using the OpenAI Image API.
+  label:
+  - ai
+  - image-generation
+  - openai

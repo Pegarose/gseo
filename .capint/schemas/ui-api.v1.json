@@ -1,0 +1,85 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://capint.dev/schemas/ui-api.v1.json",
+  "title": "CapInt UI Wizard API",
+  "definitions": {
+    "RouteRequest": {
+      "type": "object",
+      "required": ["task"],
+      "properties": {
+        "task": { "type": "string", "minLength": 1 },
+        "locale": { "enum": ["tr", "en"] }
+      }
+    },
+    "RouteResponse": {
+      "type": "object",
+      "required": ["result", "text_report", "chat_copy"],
+      "properties": {
+        "result": {
+          "type": "object",
+          "required": ["execution_intent"],
+          "properties": {
+            "execution_intent": { "$ref": "execution-intent.v1.json" }
+          }
+        },
+        "text_report": { "type": "string" },
+        "chat_copy": { "type": "string" }
+      }
+    },
+    "HealthResponse": {
+      "type": "object",
+      "required": ["ok", "doctor", "status"],
+      "properties": {
+        "ok": { "type": "boolean" },
+        "doctor": { "type": "object" },
+        "status": {
+          "type": "object",
+          "properties": {
+            "skills_on_disk": { "type": "number" },
+            "core_skills": { "type": "number" },
+            "matrix_version": { "type": ["string", "null"] },
+            "capint_package": { "type": "string" }
+          }
+        }
+      }
+    },
+    "RecoverRequest": {
+      "type": "object",
+      "properties": {
+        "apply": { "type": "boolean", "default": false },
+        "latest": { "type": "boolean", "default": true }
+      }
+    },
+    "FeedbackRequest": {
+      "type": "object",
+      "properties": {
+        "rating": { "type": "integer", "minimum": 1, "maximum": 5 },
+        "comment": { "type": "string", "maxLength": 2000 },
+        "source": { "type": "string", "default": "ui" }
+      }
+    }
+  },
+  "paths": {
+    "/api/health": {
+      "get": { "response": { "$ref": "#/definitions/HealthResponse" } }
+    },
+    "/api/route": {
+      "post": {
+        "request": { "$ref": "#/definitions/RouteRequest" },
+        "response": { "$ref": "#/definitions/RouteResponse" }
+      }
+    },
+    "/api/recover": {
+      "post": {
+        "request": { "$ref": "#/definitions/RecoverRequest" },
+        "response": { "type": "object" }
+      }
+    },
+    "/api/feedback": {
+      "post": {
+        "request": { "$ref": "#/definitions/FeedbackRequest" },
+        "response": { "type": "object", "properties": { "ok": { "type": "boolean" } } }
+      }
+    }
+  }
+}

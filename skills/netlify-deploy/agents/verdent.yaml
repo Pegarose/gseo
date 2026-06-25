@@ -1,0 +1,7 @@
+category: DevOps
+interface:
+  display_name: 'Netlify Deploy'
+  short_description: 'Deploy web projects to Netlify with the Netlify CLI'
+  icon_dark: './assets/icon-dark.png'
+  icon_light: './assets/icon-light.png'
+  default_prompt: 'Deploy this project to Netlify.'

@@ -1,0 +1,11 @@
+category: Development
+interface:
+  display_name: PR Creator
+  short_description: Create high-quality Pull Requests following repo standards.
+  icon_dark: './assets/icon-dark.png'
+  icon_light: './assets/icon-light.png'
+  default_prompt: Create a pull request for my changes.
+  label:
+    - github
+    - pull-request
+    - collaboration

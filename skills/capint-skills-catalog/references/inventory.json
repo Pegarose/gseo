@@ -1,0 +1,1092 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-05-27",
+  "total": 113,
+  "by_tier": {
+    "core": 3,
+    "recommended": 27,
+    "optional": 83
+  },
+  "skills": [
+    {
+      "name": "agent-browser",
+      "tier": "optional",
+      "tier_label": "Opsiyonel",
+      "bundle": "verdent",
+      "origin": "verdent",
+      "description": "Browser automation CLI for AI agents. Use when the user needs to interact with websites, including n",
+      "install": "prismx skill add agent-browser"
+    },
+    {
+      "name": "algorithmic-art",
+      "tier": "optional",
+      "tier_label": "Opsiyonel",
+      "bundle": "verdent",
+      "origin": "verdent",
+      "description": "Creating algorithmic art using p5.js with seeded randomness and interactive parameter exploration. U",
+      "install": "prismx skill add algorithmic-art"
+    },
+    {
+      "name": "api-and-interface-design",
+      "tier": "optional",
+      "tier_label": "Opsiyonel",
+      "bundle": "prismx",
+      "origin": "prismx",
+      "description": "Guides stable API and interface design. Use when designing APIs, module boundaries, or any public in",
+      "install": "prismx skill add api-and-interface-design"
+    },
+    {
+      "name": "aspnet-core",
+      "tier": "optional",
+      "tier_label": "Opsiyonel",
+      "bundle": "verdent",
+      "origin": "verdent",
+      "description": "Build, review, refactor, or architect ASP.NET Core web applications using current official guidance ",
+      "install": "prismx skill add aspnet-core"
+    },
+    {
+      "name": "auth-patterns",
+      "tier": "optional",
+      "tier_label": "Opsiyonel",
+      "bundle": "prismx",
+      "origin": "prismx",
+      "description": "Complete guide for implementing authentication and authorization in modern applications.",
+      "install": "prismx skill add auth-patterns"
+    },
+    {
+      "name": "best-practices",
+      "tier": "optional",
+      "tier_label": "Opsiyonel",
+      "bundle": "prismx",
+      "origin": "prismx",
+      "description": "Apply modern web development best practices for security, compatibility, and code quality. Use when ",
+      "install": "prismx skill add best-practices"
+    },
+    {
+      "name": "better-auth-best-practices",
+      "tier": "optional",
+      "tier_label": "Opsiyonel",
+      "bundle": "verdent",
+      "origin": "verdent",
+      "description": "Configure Better Auth server and client, set up database adapters, manage sessions, add plugins, and",
+      "install": "prismx skill add better-auth-best-practices"
+    },
+    {
+      "name": "brainstorming",
+      "tier": "recommended",
+      "tier_label": "Önerilen",
+      "bundle": "prismx",
+      "origin": "prismx",
+      "description": "You MUST use this before any creative work - creating features, building components, adding function",
+      "install": "prismx skill add brainstorming"
+    },
+    {
+      "name": "canvas-design",
+      "tier": "optional",
+      "tier_label": "Opsiyonel",
+      "bundle": "verdent",
+      "origin": "verdent",
+      "description": "Create beautiful visual art in .png and .pdf documents using design philosophy. You should use this ",
+      "install": "prismx skill add canvas-design"
+    },
+    {
+      "name": "ci-cd-and-automation",
+      "tier": "optional",
+      "tier_label": "Opsiyonel",
+      "bundle": "prismx",
+      "origin": "prismx",
+      "description": "Automates CI/CD pipeline setup. Use when setting up or modifying build and deployment pipelines. Use",
+      "install": "prismx skill add ci-cd-and-automation"
+    },
+    {
+      "name": "cloudflare",
+      "tier": "optional",
+      "tier_label": "Opsiyonel",
+      "bundle": "verdent",
+      "origin": "verdent",
+      "description": "Comprehensive Cloudflare platform skill covering Workers, Pages, storage (KV, D1, R2), AI (Workers A",
+      "install": "prismx skill add cloudflare"
+    },
+    {
+      "name": "code-reviewer",
+      "tier": "recommended",
+      "tier_label": "Önerilen",
+      "bundle": "prismx",
+      "origin": "prismx",
+      "description": "Conducts multi-axis code review. Use before merging any change. Use when reviewing code written by y",
+      "install": "prismx skill add code-reviewer"
+    },
+    {
+      "name": "code-simplifier",
+      "tier": "optional",
+      "tier_label": "Opsiyonel",
+      "bundle": "verdent",
+      "origin": "verdent",
+      "description": "Simplifies and refines code for clarity, consistency, and maintainability while preserving all funct",
+      "install": "prismx skill add code-simplifier"
+    },
+    {
+      "name": "concept-modeler",
+      "tier": "recommended",
+      "tier_label": "Önerilen",
+      "bundle": "prismx",
+      "origin": "prismx",
+      "description": "当用户需求模糊、术语不清晰时使用。通过交互式追问澄清领域概念，提取实体、流程和暗物质。由 /genesis Step 1 调用。",
+      "install": "prismx skill add concept-modeler"
+    },
+    {
+      "name": "context-engineering",
+      "tier": "recommended",
+      "tier_label": "Önerilen",
+      "bundle": "prismx",
+      "origin": "prismx",
+      "description": "Optimizes agent context setup. Use when starting a new session, when agent output quality degrades, ",
+      "install": "prismx skill add context-engineering"
+    },
+    {
+      "name": "copywriting",
+      "tier": "optional",
+      "tier_label": "Opsiyonel",
+      "bundle": "prismx",
+      "origin": "prismx",
+      "description": "When the user wants to write, rewrite, or improve marketing copy for any page — including homepage, ",
+      "install": "prismx skill add copywriting"
+    },
+    {
+      "name": "core-web-vitals",
+      "tier": "optional",
+      "tier_label": "Opsiyonel",
+      "bundle": "prismx",
+      "origin": "prismx",
+      "description": "Optimize Core Web Vitals (LCP, INP, CLS) for better page experience and search ranking. Use when ask",
+      "install": "prismx skill add core-web-vitals"
+    },
+    {
+      "name": "craft-authoring",
+      "tier": "optional",
+      "tier_label": "Opsiyonel",
+      "bundle": "prismx",
+      "origin": "prismx",
+      "description": "执行 /craft 时必读：提供 Workflow / Skill / Prompt 的脚手架模板、防护语法、填充与验证清单；长模板与自检细节不在 craft workflow 内重复，一律以本 sk",
+      "install": "prismx skill add craft-authoring"
+    },
+    {
+      "name": "create-design-system-rules",
+      "tier": "optional",
+      "tier_label": "Opsiyonel",
+      "bundle": "verdent",
+      "origin": "verdent",
+      "description": "Generates custom design system rules for the user's codebase. Use when user says \"create design syst",
+      "install": "prismx skill add create-design-system-rules"
+    },
+    {
+      "name": "database-and-data-modeling",
+      "tier": "optional",
+      "tier_label": "Opsiyonel",
+      "bundle": "prismx",
+      "origin": "prismx",
+      "description": "Comprehensive guide for database schema design, migration strategies, ORM patterns,",
+      "install": "prismx skill add database-and-data-modeling"
+    },
+    {
+      "name": "database-blueprints",
+      "tier": "optional",
+      "tier_label": "Opsiyonel",
+      "bundle": "verdent",
+      "origin": "verdent",
+      "description": "|",
+      "install": "prismx skill add database-blueprints"
+    },
+    {
+      "name": "delivery-acceptance",
+      "tier": "optional",
+      "tier_label": "Opsiyonel",
+      "bundle": "verdent",
+      "origin": "verdent",
+      "description": "|",
+      "install": "prismx skill add delivery-acceptance"
+    },
+    {
+      "name": "dependency-audit",
+      "tier": "optional",
+      "tier_label": "Opsiyonel",
+      "bundle": "prismx",
+      "origin": "prismx",
+      "description": "Scans project dependencies for vulnerabilities, outdated packages, and unused deps.",
+      "install": "prismx skill add dependency-audit"
+    },
+    {
+      "name": "deprecation-and-migration",
+      "tier": "optional",
+      "tier_label": "Opsiyonel",
+      "bundle": "prismx",
+      "origin": "prismx",
+      "description": "Manages deprecation and migration. Use when removing old systems, APIs, or features. Use when migrat",
+      "install": "prismx skill add deprecation-and-migration"
+    },
+    {
+      "name": "design-reviewer",
+      "tier": "recommended",
+      "tier_label": "Önerilen",
+      "bundle": "prismx",
+      "origin": "prismx",
+      "description": "使用三维框架（系统设计、运行模拟、工程实现）系统性审查架构 and 系统设计文档，作为 challenge 工作流中的规范契约设计证据层。产出按严重度分级的发现，关联 to 具体文档段落。",
+      "install": "prismx skill add design-reviewer"
+    },
+    {
+      "name": "develop-web-game",
+      "tier": "optional",
+      "tier_label": "Opsiyonel",
+      "bundle": "verdent",
+      "origin": "verdent",
+      "description": "Use when the agent is building or iterating on a web game (HTML/JS) and needs a reliable development",
+      "install": "prismx skill add develop-web-game"
+    },
+    {
+      "name": "dignified-python",
+      "tier": "optional",
+      "tier_label": "Opsiyonel",
+      "bundle": "verdent",
+      "origin": "verdent",
+      "description": "Production Python coding standards with automatic version detection (3.10-3.13). Use when writing,",
+      "install": "prismx skill add dignified-python"
+    },
+    {
+      "name": "dispatching-parallel-agents",
+      "tier": "recommended",
+      "tier_label": "Önerilen",
+      "bundle": "prismx",
+      "origin": "prismx",
+      "description": "Use when facing 2+ independent tasks that can be worked on without shared state or sequential depend",
+      "install": "prismx skill add dispatching-parallel-agents"
+    },
+    {
+      "name": "documentation-and-adrs",
+      "tier": "recommended",
+      "tier_label": "Önerilen",
+      "bundle": "prismx",
+      "origin": "prismx",
+      "description": "Records decisions and documentation. Use when making architectural decisions, changing public APIs, ",
+      "install": "prismx skill add documentation-and-adrs"
+    },
+    {
+      "name": "documentation-sync",
+      "tier": "recommended",
+      "tier_label": "Önerilen",
+      "bundle": "prismx",
+      "origin": "prismx",
+      "description": "After significant code changes, finds stale documentation and updates README, API docs,",
+      "install": "prismx skill add documentation-sync"
+    },
+    {
+      "name": "documentation-writer",
+      "tier": "optional",
+      "tier_label": "Opsiyonel",
+      "bundle": "verdent",
+      "origin": "verdent",
+      "description": "Diátaxis Documentation Expert. An expert technical writer specializing in creating high-quality soft",
+      "install": "prismx skill add documentation-writer"
+    },
+    {
+      "name": "docx",
+      "tier": "optional",
+      "tier_label": "Opsiyonel",
+      "bundle": "verdent",
+      "origin": "verdent",
+      "description": "Word document toolkit for .docx files. Activate when the task involves reading, creating, editing, a",
+      "install": "prismx skill add docx"
+    },
+    {
+      "name": "doubt-driven-development",
+      "tier": "recommended",
+      "tier_label": "Önerilen",
+      "bundle": "prismx",
+      "origin": "prismx",
+      "description": "Subjects every non-trivial decision to a fresh-context adversarial review before it stands. Use when",
+      "install": "prismx skill add doubt-driven-development"
+    },
+    {
+      "name": "e2e-testing-guide",
+      "tier": "optional",
+      "tier_label": "Opsiyonel",
+      "bundle": "prismx",
+      "origin": "prismx",
+      "description": "为依赖浏览器或页面交互的任务生成真实用户视角的 E2E 验证清单，并在具备浏览器自动化能力且用户授权时执行页面验证、收集证据。",
+      "install": "prismx skill add e2e-testing-guide"
+    },
+    {
+      "name": "emil-design-eng",
+      "tier": "optional",
+      "tier_label": "Opsiyonel",
+      "bundle": "prismx",
+      "origin": "prismx",
+      "description": "This skill encodes Emil Kowalski's philosophy on UI polish, component design, animation decisions, a",
+      "install": "prismx skill add emil-design-eng"
+    },
+    {
+      "name": "environment-and-config",
+      "tier": "optional",
+      "tier_label": "Opsiyonel",
+      "bundle": "prismx",
+      "origin": "prismx",
+      "description": "Environment and configuration management — .env files, validation with Zod/envalid, feature flags, s",
+      "install": "prismx skill add environment-and-config"
+    },
+    {
+      "name": "error-handling",
+      "tier": "optional",
+      "tier_label": "Opsiyonel",
+      "bundle": "prismx",
+      "origin": "prismx",
+      "description": "Comprehensive guide for structured error handling in modern applications. Covers error",
+      "install": "prismx skill add error-handling"
+    },
+    {
+      "name": "excalidraw-diagram-generator",
+      "tier": "optional",
+      "tier_label": "Opsiyonel",
+      "bundle": "verdent",
+      "origin": "verdent",
+      "description": "Generate Excalidraw diagrams from natural language descriptions. Use when asked to \"create a diagram",
+      "install": "prismx skill add excalidraw-diagram-generator"
+    },
+    {
+      "name": "executing-plans",
+      "tier": "recommended",
+      "tier_label": "Önerilen",
+      "bundle": "prismx",
+      "origin": "prismx",
+      "description": "Delivers changes incrementally. Use when implementing any feature or change that touches more than o",
+      "install": "prismx skill add executing-plans"
+    },
+    {
+      "name": "figma",
+      "tier": "optional",
+      "tier_label": "Opsiyonel",
+      "bundle": "verdent",
+      "origin": "verdent",
+      "description": "Use the Figma MCP server to fetch design context, screenshots, variables, and assets from Figma, and",
+      "install": "prismx skill add figma"
+    },
+    {
+      "name": "figma-implement-design",
+      "tier": "optional",
+      "tier_label": "Opsiyonel",
+      "bundle": "verdent",
+      "origin": "verdent",
+      "description": "Translate Figma nodes into production-ready code with 1:1 visual fidelity using the Figma MCP workfl",
+      "install": "prismx skill add figma-implement-design"
+    },
+    {
+      "name": "find-docs",
+      "tier": "optional",
+      "tier_label": "Opsiyonel",
+      "bundle": "verdent",
+      "origin": "verdent",
+      "description": "-",
+      "install": "prismx skill add find-docs"
+    },
+    {
+      "name": "find-skills",
+      "tier": "optional",
+      "tier_label": "Opsiyonel",
+      "bundle": "prismx",
+      "origin": "prismx",
+      "description": "Helps users discover and install agent skills when they ask questions like \"how do I do X\", \"find a ",
+      "install": "prismx skill add find-skills"
+    },
+    {
+      "name": "firecrawl",
+      "tier": "optional",
+      "tier_label": "Opsiyonel",
+      "bundle": "verdent",
+      "origin": "verdent",
+      "description": "|",
+      "install": "prismx skill add firecrawl"
+    },
+    {
+      "name": "flutter-architecting-apps",
+      "tier": "optional",
+      "tier_label": "Opsiyonel",
+      "bundle": "verdent",
+      "origin": "verdent",
+      "description": "Architects a Flutter application using the recommended layered approach (UI, Logic, Data). Use when ",
+      "install": "prismx skill add flutter-architecting-apps"
+    },
+    {
+      "name": "frontend-design-pro",
+      "tier": "optional",
+      "tier_label": "Opsiyonel",
+      "bundle": "prismx",
+      "origin": "prismx",
+      "description": "Builds production-quality UIs. Use when building or modifying user-facing interfaces. Use when creat",
+      "install": "prismx skill add frontend-design-pro"
+    },
+    {
+      "name": "frontend-slides",
+      "tier": "optional",
+      "tier_label": "Opsiyonel",
+      "bundle": "verdent",
+      "origin": "verdent",
+      "description": "Create stunning, animation-rich HTML presentations from scratch or by converting PowerPoint files. U",
+      "install": "prismx skill add frontend-slides"
+    },
+    {
+      "name": "gh-cli",
+      "tier": "optional",
+      "tier_label": "Opsiyonel",
+      "bundle": "verdent",
+      "origin": "verdent",
+      "description": "GitHub CLI (gh) comprehensive reference for repositories, issues, pull requests, Actions, projects, ",
+      "install": "prismx skill add gh-cli"
+    },
+    {
+      "name": "git-commit",
+      "tier": "optional",
+      "tier_label": "Opsiyonel",
+      "bundle": "verdent",
+      "origin": "verdent",
+      "description": "Execute git commit with conventional commit message analysis, intelligent staging, and message gener",
+      "install": "prismx skill add git-commit"
+    },
+    {
+      "name": "git-workflow-and-versioning",
+      "tier": "recommended",
+      "tier_label": "Önerilen",
+      "bundle": "prismx",
+      "origin": "prismx",
+      "description": "Structures git workflow practices. Use when making any code change. Use when committing, branching, ",
+      "install": "prismx skill add git-workflow-and-versioning"
+    },
+    {
+      "name": "graphql-operations",
+      "tier": "optional",
+      "tier_label": "Opsiyonel",
+      "bundle": "verdent",
+      "origin": "verdent",
+      "description": "Guide for writing GraphQL operations (queries, mutations, fragments) following best practices. Use t",
+      "install": "prismx skill add graphql-operations"
+    },
+    {
+      "name": "graphql-schema",
+      "tier": "optional",
+      "tier_label": "Opsiyonel",
+      "bundle": "verdent",
+      "origin": "verdent",
+      "description": "Guide for designing GraphQL schemas following industry best practices. Use this skill when:",
+      "install": "prismx skill add graphql-schema"
+    },
+    {
+      "name": "hugging-face-model-trainer",
+      "tier": "optional",
+      "tier_label": "Opsiyonel",
+      "bundle": "verdent",
+      "origin": "verdent",
+      "description": "This skill should be used when users want to train or fine-tune language models using TRL (Transform",
+      "install": "prismx skill add hugging-face-model-trainer"
+    },
+    {
+      "name": "imagegen",
+      "tier": "optional",
+      "tier_label": "Opsiyonel",
+      "bundle": "verdent",
+      "origin": "verdent",
+      "description": "Use when the user asks to generate or edit images via the OpenAI Image API (for example: generate im",
+      "install": "prismx skill add imagegen"
+    },
+    {
+      "name": "impeccable",
+      "tier": "optional",
+      "tier_label": "Opsiyonel",
+      "bundle": "prismx",
+      "origin": "prismx",
+      "description": "Audit and improve web accessibility following WCAG 2.2 guidelines. Use when asked to \"improve access",
+      "install": "prismx skill add impeccable"
+    },
+    {
+      "name": "improve-codebase-architecture",
+      "tier": "recommended",
+      "tier_label": "Önerilen",
+      "bundle": "prismx",
+      "origin": "prismx",
+      "description": "Simplifies code for clarity. Use when refactoring code for clarity without changing behavior. Use wh",
+      "install": "prismx skill add improve-codebase-architecture"
+    },
+    {
+      "name": "incident-response",
+      "tier": "optional",
+      "tier_label": "Opsiyonel",
+      "bundle": "prismx",
+      "origin": "prismx",
+      "description": "Structured production incident handling — classify severity, gather evidence, contain,",
+      "install": "prismx skill add incident-response"
+    },
+    {
+      "name": "interview-me",
+      "tier": "optional",
+      "tier_label": "Opsiyonel",
+      "bundle": "prismx",
+      "origin": "prismx",
+      "description": "Extracts what the user actually wants instead of what they think they should want. Achieves this thr",
+      "install": "prismx skill add interview-me"
+    },
+    {
+      "name": "knowledge-base-update",
+      "tier": "recommended",
+      "tier_label": "Önerilen",
+      "bundle": "prismx",
+      "origin": "prismx",
+      "description": "Persists important learnings (decisions, gotchas, bugs, conventions) into the PrismX",
+      "install": "prismx skill add knowledge-base-update"
+    },
+    {
+      "name": "langchain-rag",
+      "tier": "optional",
+      "tier_label": "Opsiyonel",
+      "bundle": "verdent",
+      "origin": "verdent",
+      "description": "INVOKE THIS SKILL when building ANY retrieval-augmented generation (RAG) system. Covers document loa",
+      "install": "prismx skill add langchain-rag"
+    },
+    {
+      "name": "linear",
+      "tier": "optional",
+      "tier_label": "Opsiyonel",
+      "bundle": "verdent",
+      "origin": "verdent",
+      "description": "Manage issues, projects & team workflows in Linear. Use when the user wants to read, create or updat",
+      "install": "prismx skill add linear"
+    },
+    {
+      "name": "localization-hub",
+      "tier": "optional",
+      "tier_label": "Opsiyonel",
+      "bundle": "verdent",
+      "origin": "verdent",
+      "description": "Guides centralized i18n/localization work for Laravel projects with a single admin-managed translati",
+      "install": "prismx skill add localization-hub"
+    },
+    {
+      "name": "mcp-builder",
+      "tier": "optional",
+      "tier_label": "Opsiyonel",
+      "bundle": "verdent",
+      "origin": "verdent",
+      "description": "Guide for creating high-quality MCP (Model Context Protocol) servers that enable LLMs to interact wi",
+      "install": "prismx skill add mcp-builder"
+    },
+    {
+      "name": "netlify-deploy",
+      "tier": "optional",
+      "tier_label": "Opsiyonel",
+      "bundle": "verdent",
+      "origin": "verdent",
+      "description": "Deploy web projects to Netlify using the Netlify CLI (`npx netlify`). Use when the user asks to depl",
+      "install": "prismx skill add netlify-deploy"
+    },
+    {
+      "name": "nexus-mapper",
+      "tier": "optional",
+      "tier_label": "Opsiyonel",
+      "bundle": "prismx",
+      "origin": "prismx",
+      "description": "Generate a persistent .nexus-map/ knowledge base that lets any AI session instantly understand a cod",
+      "install": "prismx skill add nexus-mapper"
+    },
+    {
+      "name": "notion-spec-to-implementation",
+      "tier": "optional",
+      "tier_label": "Opsiyonel",
+      "bundle": "verdent",
+      "origin": "verdent",
+      "description": "Turn Notion specs into implementation plans, tasks, and progress tracking; use when implementing PRD",
+      "install": "prismx skill add notion-spec-to-implementation"
+    },
+    {
+      "name": "pdf",
+      "tier": "optional",
+      "tier_label": "Opsiyonel",
+      "bundle": "verdent",
+      "origin": "verdent",
+      "description": "PDF toolkit for reading, analyzing, and creating PDF documents. Extracts text, tables, images, LaTeX",
+      "install": "prismx skill add pdf"
+    },
+    {
+      "name": "performance",
+      "tier": "optional",
+      "tier_label": "Opsiyonel",
+      "bundle": "prismx",
+      "origin": "prismx",
+      "description": "Optimize web performance for faster loading and better user experience. Use when asked to \"speed up ",
+      "install": "prismx skill add performance"
+    },
+    {
+      "name": "playwright",
+      "tier": "optional",
+      "tier_label": "Opsiyonel",
+      "bundle": "verdent",
+      "origin": "verdent",
+      "description": "Use when the task requires automating a real browser from the terminal (navigation, form filling, sn",
+      "install": "prismx skill add playwright"
+    },
+    {
+      "name": "playwriter",
+      "tier": "optional",
+      "tier_label": "Opsiyonel",
+      "bundle": "verdent",
+      "origin": "verdent",
+      "description": "Control your Chrome browser via the Playwriter extension using Playwright code snippets in a statefu",
+      "install": "prismx skill add playwriter"
+    },
+    {
+      "name": "pptx",
+      "tier": "optional",
+      "tier_label": "Opsiyonel",
+      "bundle": "verdent",
+      "origin": "verdent",
+      "description": "Presentation file toolkit for .pptx documents. Activate whenever the task involves creating, reading",
+      "install": "prismx skill add pptx"
+    },
+    {
+      "name": "pr-creator",
+      "tier": "optional",
+      "tier_label": "Opsiyonel",
+      "bundle": "verdent",
+      "origin": "verdent",
+      "description": "Use this skill when asked to create a pull request (PR). It ensures all PRs",
+      "install": "prismx skill add pr-creator"
+    },
+    {
+      "name": "prd",
+      "tier": "optional",
+      "tier_label": "Opsiyonel",
+      "bundle": "verdent",
+      "origin": "verdent",
+      "description": "Generate high-quality Product Requirements Documents (PRDs) for software systems and AI-powered feat",
+      "install": "prismx skill add prd"
+    },
+    {
+      "name": "prismx-skill-gateway",
+      "tier": "core",
+      "tier_label": "PrismX çekirdek",
+      "bundle": "prismx",
+      "origin": "prismx",
+      "description": "PrismX Skill Gateway — Invisible skill router. PRIORITY: Consult this skill BEFORE any other for ANY",
+      "install": "always (init)"
+    },
+    {
+      "name": "prismx-skills-catalog",
+      "tier": "recommended",
+      "tier_label": "Önerilen",
+      "bundle": "prismx",
+      "origin": "prismx",
+      "description": "Master index of all PrismX skills installed in this project (112+). Use when user asks",
+      "install": "prismx skill add prismx-skills-catalog"
+    },
+    {
+      "name": "prompt-enhancer",
+      "tier": "recommended",
+      "tier_label": "Önerilen",
+      "bundle": "prismx",
+      "origin": "prismx",
+      "description": "Transforms vague or incomplete user requests into precise, actionable prompts with",
+      "install": "prismx skill add prompt-enhancer"
+    },
+    {
+      "name": "react-native-best-practices",
+      "tier": "optional",
+      "tier_label": "Opsiyonel",
+      "bundle": "verdent",
+      "origin": "verdent",
+      "description": "Provides React Native performance optimization guidelines for FPS, TTI, bundle size, memory leaks, r",
+      "install": "prismx skill add react-native-best-practices"
+    },
+    {
+      "name": "redis-development",
+      "tier": "optional",
+      "tier_label": "Opsiyonel",
+      "bundle": "verdent",
+      "origin": "verdent",
+      "description": "Redis performance optimization and best practices. Use this skill when working with Redis data struc",
+      "install": "prismx skill add redis-development"
+    },
+    {
+      "name": "refactor",
+      "tier": "optional",
+      "tier_label": "Opsiyonel",
+      "bundle": "verdent",
+      "origin": "verdent",
+      "description": "Surgical code refactoring to improve maintainability without changing behavior. Covers extracting fu",
+      "install": "prismx skill add refactor"
+    },
+    {
+      "name": "runtime-inspector",
+      "tier": "optional",
+      "tier_label": "Opsiyonel",
+      "bundle": "prismx",
+      "origin": "prismx",
+      "description": "分析运行时行为、进程边界和 IPC 机制，检测\"协议漂移\"风险和进程生命周期问题。",
+      "install": "prismx skill add runtime-inspector"
+    },
+    {
+      "name": "schema-markup",
+      "tier": "optional",
+      "tier_label": "Opsiyonel",
+      "bundle": "prismx",
+      "origin": "prismx",
+      "description": "When the user wants to add, fix, or optimize schema markup and structured data on their site. Also u",
+      "install": "prismx skill add schema-markup"
+    },
+    {
+      "name": "screenshot",
+      "tier": "optional",
+      "tier_label": "Opsiyonel",
+      "bundle": "verdent",
+      "origin": "verdent",
+      "description": "Use when the user explicitly asks for a desktop or system screenshot (full screen, specific app or w",
+      "install": "prismx skill add screenshot"
+    },
+    {
+      "name": "security-and-hardening",
+      "tier": "recommended",
+      "tier_label": "Önerilen",
+      "bundle": "prismx",
+      "origin": "prismx",
+      "description": "Hardens code against vulnerabilities. Use when handling user input, authentication, data storage, or",
+      "install": "prismx skill add security-and-hardening"
+    },
+    {
+      "name": "security-best-practices",
+      "tier": "optional",
+      "tier_label": "Opsiyonel",
+      "bundle": "verdent",
+      "origin": "verdent",
+      "description": "Perform language and framework specific security best-practice reviews and suggest improvements. Tri",
+      "install": "prismx skill add security-best-practices"
+    },
+    {
+      "name": "security-ownership-map",
+      "tier": "optional",
+      "tier_label": "Opsiyonel",
+      "bundle": "verdent",
+      "origin": "verdent",
+      "description": "Analyze git repositories to build a security ownership topology (people-to-file), compute bus factor",
+      "install": "prismx skill add security-ownership-map"
+    },
+    {
+      "name": "security-threat-model",
+      "tier": "optional",
+      "tier_label": "Opsiyonel",
+      "bundle": "verdent",
+      "origin": "verdent",
+      "description": "Repository-grounded threat modeling that enumerates trust boundaries, assets, attacker capabilities,",
+      "install": "prismx skill add security-threat-model"
+    },
+    {
+      "name": "seo-audit",
+      "tier": "optional",
+      "tier_label": "Opsiyonel",
+      "bundle": "prismx",
+      "origin": "prismx",
+      "description": "Optimize for search engine visibility and ranking. Use when asked to \"improve SEO\", \"optimize for se",
+      "install": "prismx skill add seo-audit"
+    },
+    {
+      "name": "sequential-thinking",
+      "tier": "core",
+      "tier_label": "PrismX çekirdek",
+      "bundle": "prismx",
+      "origin": "prismx",
+      "description": "当复杂问题需要系统性逐步推理时使用。适用于多阶段分析、设计规划、问题分解，或初始范围不明确且需要受控收敛的任务。",
+      "install": "always (init)"
+    },
+    {
+      "name": "session-context-primer",
+      "tier": "recommended",
+      "tier_label": "Önerilen",
+      "bundle": "prismx",
+      "origin": "prismx",
+      "description": "Run at the start of every new session before coding. Loads HANDOFF, CURRENT_TASK,",
+      "install": "prismx skill add session-context-primer"
+    },
+    {
+      "name": "shipping-and-launch",
+      "tier": "optional",
+      "tier_label": "Opsiyonel",
+      "bundle": "prismx",
+      "origin": "prismx",
+      "description": "Prepares production launches. Use when preparing to deploy to production. Use when you need a pre-la",
+      "install": "prismx skill add shipping-and-launch"
+    },
+    {
+      "name": "source-driven-development",
+      "tier": "recommended",
+      "tier_label": "Önerilen",
+      "bundle": "prismx",
+      "origin": "prismx",
+      "description": "Grounds every implementation decision in official documentation. Use when you want authoritative, so",
+      "install": "prismx skill add source-driven-development"
+    },
+    {
+      "name": "spec-writer",
+      "tier": "recommended",
+      "tier_label": "Önerilen",
+      "bundle": "prismx",
+      "origin": "prismx",
+      "description": "Creates specs before coding. Use when starting a new project, feature, or significant change and no ",
+      "install": "prismx skill add spec-writer"
+    },
+    {
+      "name": "speech",
+      "tier": "optional",
+      "tier_label": "Opsiyonel",
+      "bundle": "verdent",
+      "origin": "verdent",
+      "description": "Use when the user asks for text-to-speech narration or voiceover, accessibility reads, audio prompts",
+      "install": "prismx skill add speech"
+    },
+    {
+      "name": "system-architect",
+      "tier": "recommended",
+      "tier_label": "Önerilen",
+      "bundle": "prismx",
+      "origin": "prismx",
+      "description": "识别项目中的独立系统，定义系统边界。产出系统架构总览，为后续系统设计奠定基础。",
+      "install": "prismx skill add system-architect"
+    },
+    {
+      "name": "system-designer",
+      "tier": "recommended",
+      "tier_label": "Önerilen",
+      "bundle": "prismx",
+      "origin": "prismx",
+      "description": "为单个系统设计详细的技术文档。负责架构图、接口设计、数据模型、Trade-offs讨论等。",
+      "install": "prismx skill add system-designer"
+    },
+    {
+      "name": "systematic-debugging",
+      "tier": "recommended",
+      "tier_label": "Önerilen",
+      "bundle": "prismx",
+      "origin": "prismx",
+      "description": "Guides systematic root-cause debugging. Use when tests fail, builds break, behavior doesn't match ex",
+      "install": "prismx skill add systematic-debugging"
+    },
+    {
+      "name": "task-planner",
+      "tier": "recommended",
+      "tier_label": "Önerilen",
+      "bundle": "prismx",
+      "origin": "prismx",
+      "description": "使用WBS方法将系统设计文档分解为层次化任务。支持依赖分析、追溯链、验收标准。",
+      "install": "prismx skill add task-planner"
+    },
+    {
+      "name": "task-reviewer",
+      "tier": "recommended",
+      "tier_label": "Önerilen",
+      "bundle": "prismx",
+      "origin": "prismx",
+      "description": "系统性审查 TASKS.md 的质量与完备性，作为 challenge 工作流中的规范契约任务承接证据层。通过 7 大检测 Pass 在语义模型上运行，检测重复、歧义、欠详述、不一致、覆盖缺口和质量问",
+      "install": "prismx skill add task-reviewer"
+    },
+    {
+      "name": "task-skill-router",
+      "tier": "recommended",
+      "tier_label": "Önerilen",
+      "bundle": "prismx",
+      "origin": "prismx",
+      "description": "Classifies user tasks by weight (light/medium/heavy), maps to installed PrismX skills",
+      "install": "prismx skill add task-skill-router"
+    },
+    {
+      "name": "tech-evaluator",
+      "tier": "optional",
+      "tier_label": "Opsiyonel",
+      "bundle": "prismx",
+      "origin": "prismx",
+      "description": "评估技术栈选项，使用加权决策矩阵和 ATAM 方法论产出架构决策记录 (ADR)。",
+      "install": "prismx skill add tech-evaluator"
+    },
+    {
+      "name": "test-driven-development",
+      "tier": "recommended",
+      "tier_label": "Önerilen",
+      "bundle": "prismx",
+      "origin": "prismx",
+      "description": "Drives development with tests. Use when implementing any logic, fixing any bug, or changing any beha",
+      "install": "prismx skill add test-driven-development"
+    },
+    {
+      "name": "theme-factory",
+      "tier": "optional",
+      "tier_label": "Opsiyonel",
+      "bundle": "verdent",
+      "origin": "verdent",
+      "description": "Toolkit for styling artifacts with a theme. These artifacts can be slides, docs, reportings, HTML la",
+      "install": "prismx skill add theme-factory"
+    },
+    {
+      "name": "transcribe",
+      "tier": "optional",
+      "tier_label": "Opsiyonel",
+      "bundle": "verdent",
+      "origin": "verdent",
+      "description": "Transcribe audio files to text with optional diarization and known-speaker hints. Use when a user as",
+      "install": "prismx skill add transcribe"
+    },
+    {
+      "name": "vercel-composition-patterns",
+      "tier": "optional",
+      "tier_label": "Opsiyonel",
+      "bundle": "verdent",
+      "origin": "verdent",
+      "description": "React composition patterns that scale. Use when refactoring components with",
+      "install": "prismx skill add vercel-composition-patterns"
+    },
+    {
+      "name": "vercel-deploy",
+      "tier": "optional",
+      "tier_label": "Opsiyonel",
+      "bundle": "verdent",
+      "origin": "verdent",
+      "description": "Deploy applications and websites to Vercel. Use when the user requests deployment actions like \"depl",
+      "install": "prismx skill add vercel-deploy"
+    },
+    {
+      "name": "vercel-react-best-practices",
+      "tier": "optional",
+      "tier_label": "Opsiyonel",
+      "bundle": "verdent",
+      "origin": "verdent",
+      "description": "React and Next.js performance optimization guidelines from Vercel Engineering. This skill should be ",
+      "install": "prismx skill add vercel-react-best-practices"
+    },
+    {
+      "name": "verdent-image-cli",
+      "tier": "optional",
+      "tier_label": "Opsiyonel",
+      "bundle": "verdent",
+      "origin": "verdent",
+      "description": "|",
+      "install": "prismx skill add verdent-image-cli"
+    },
+    {
+      "name": "verdent-skills-catalog",
+      "tier": "recommended",
+      "tier_label": "Önerilen",
+      "bundle": "verdent",
+      "origin": "prismx",
+      "description": "Index and router for all Verdent global skills imported into PrismX. Use when the user asks",
+      "install": "prismx skill add verdent-skills-catalog"
+    },
+    {
+      "name": "verification-before-completion",
+      "tier": "core",
+      "tier_label": "PrismX çekirdek",
+      "bundle": "prismx",
+      "origin": "prismx",
+      "description": "Use when about to claim work is complete, fixed, or passing, before committing or creating PRs - req",
+      "install": "always (init)"
+    },
+    {
+      "name": "web-quality-audit",
+      "tier": "optional",
+      "tier_label": "Opsiyonel",
+      "bundle": "prismx",
+      "origin": "prismx",
+      "description": "Comprehensive web quality audit covering performance, accessibility, SEO, and best practices. Use wh",
+      "install": "prismx skill add web-quality-audit"
+    },
+    {
+      "name": "webapp-testing",
+      "tier": "optional",
+      "tier_label": "Opsiyonel",
+      "bundle": "prismx",
+      "origin": "prismx",
+      "description": "Tests in real browsers via Chrome DevTools MCP. Use when building or debugging anything that runs in",
+      "install": "prismx skill add webapp-testing"
+    },
+    {
+      "name": "workers-best-practices",
+      "tier": "optional",
+      "tier_label": "Opsiyonel",
+      "bundle": "verdent",
+      "origin": "verdent",
+      "description": "Reviews and authors Cloudflare Workers code against production best practices. Load when writing new",
+      "install": "prismx skill add workers-best-practices"
+    },
+    {
+      "name": "xlsx",
+      "tier": "optional",
+      "tier_label": "Opsiyonel",
+      "bundle": "verdent",
+      "origin": "verdent",
+      "description": "Spreadsheet reading, data analysis, visualization, and smart editing toolkit. Use when the agent nee",
+      "install": "prismx skill add xlsx"
+    }
+  ],
+  "categories": {
+    "routing": [
+      "prismx-skill-gateway",
+      "task-skill-router",
+      "prismx-skills-catalog",
+      "verdent-skills-catalog",
+      "prompt-enhancer",
+      "session-context-primer"
+    ],
+    "development": [
+      "refactor",
+      "code-simplifier",
+      "code-reviewer",
+      "test-driven-development",
+      "systematic-debugging",
+      "git-workflow-and-versioning",
+      "git-commit",
+      "pr-creator"
+    ],
+    "planning": [
+      "brainstorming",
+      "task-planner",
+      "spec-writer",
+      "prd",
+      "executing-plans",
+      "concept-modeler"
+    ],
+    "security": [
+      "security-and-hardening",
+      "security-threat-model",
+      "security-best-practices",
+      "auth-patterns",
+      "dependency-audit",
+      "incident-response"
+    ],
+    "frontend": [
+      "frontend-design-pro",
+      "vercel-react-best-practices",
+      "figma-implement-design",
+      "impeccable",
+      "core-web-vitals"
+    ],
+    "backend": [
+      "database-and-data-modeling",
+      "database-blueprints",
+      "api-and-interface-design",
+      "localization-hub",
+      "graphql-schema"
+    ],
+    "documents": [
+      "pdf",
+      "xlsx",
+      "docx",
+      "pptx",
+      "documentation-writer",
+      "documentation-sync"
+    ],
+    "meta": [
+      "find-skills",
+      "context-engineering",
+      "nexus-mapper"
+    ]
+  }
+}
