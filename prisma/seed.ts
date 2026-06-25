@@ -21,10 +21,14 @@ async function main() {
   });
 
   // Upsert a default super admin user
-  const adminPassword = await bcrypt.hash('GSeoSuite2026!', 10);
+  const defaultPassword = 'GSeoSuite2026!';
+  const adminPassword = await bcrypt.hash(defaultPassword, 10);
   await prisma.user.upsert({
     where: { email: 'admin@gmedya.com' },
-    update: {},
+    update: {
+      passwordHash: adminPassword,
+      role: 'super_admin',
+    },
     create: {
       email: 'admin@gmedya.com',
       name: 'Super Admin',
@@ -34,10 +38,14 @@ async function main() {
   });
 
   // Upsert a default tenant user
-  const editorPassword = await bcrypt.hash('GSeoSuite2026!', 10);
+  const editorPassword = await bcrypt.hash(defaultPassword, 10);
   await prisma.user.upsert({
     where: { email: 'seo@gmedya.com' },
-    update: {},
+    update: {
+      passwordHash: editorPassword,
+      role: 'editor',
+      tenantId: tenant.id,
+    },
     create: {
       email: 'seo@gmedya.com',
       name: 'SEO Editor',
@@ -49,6 +57,26 @@ async function main() {
 
   console.log(`Tenant verified: ${tenant.name} (${tenant.id})`);
   console.log('User verified: seo@gmedya.com');
+
+  const dogfoodSites = [
+    { name: 'Efesus Stone', domain: 'efesusstone.com', platform: 'nextjs' },
+    { name: 'GMedya', domain: 'gmedya.com', platform: 'nextjs' },
+  ];
+
+  for (const site of dogfoodSites) {
+    await prisma.site.upsert({
+      where: { tenantId_domain: { tenantId: tenant.id, domain: site.domain } },
+      update: { name: site.name, platform: site.platform },
+      create: {
+        tenantId: tenant.id,
+        name: site.name,
+        domain: site.domain,
+        platform: site.platform,
+        defaultLocale: 'tr-TR',
+      },
+    });
+    console.log(`Site verified: ${site.domain}`);
+  }
 
   // Upsert a default API key for dogfooding
   const existingKey = await prisma.apiKey.findFirst({

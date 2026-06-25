@@ -9,7 +9,12 @@ import { ScoreContext, ScoreOptions, Recommendation } from '@/lib/scoring/types'
 import { checkRateLimit } from '@/lib/rate-limit';
 import { createRateLimitResponse } from '@/lib/utils/rate-limit';
 import { logApiError } from '@/lib/utils/logger';
-import { checkQuotaLimit, incrementTenantCredits } from '@/lib/auth/quota';
+import {
+  assertTenantHasCredits,
+  chargeTenantCredits,
+  InsufficientCreditsError,
+} from '@/lib/credits/charge';
+import { computeContentHash, findCachedContentSnapshot } from '@/lib/credits/content-cache';
 
 const MAX_CONTENT_SIZE = 2 * 1024 * 1024; // 2 MB
 
@@ -36,6 +41,7 @@ async function handler(req: NextRequest, context: AuthenticatedContext) {
       platform,
       pageType,
       options: rawOptions,
+      contentHash: clientContentHash,
     } = body;
 
     // --- Validation ---
@@ -68,18 +74,6 @@ async function handler(req: NextRequest, context: AuthenticatedContext) {
       return errorResponse('Site not found or access denied.', 'NOT_FOUND', 404, { siteId: resolvedSiteId }, context.requestId);
     }
 
-    // --- Quota Limit Check ---
-    const quota = await checkQuotaLimit(context.tenantId);
-    if (!quota.success) {
-      return errorResponse(
-        `AI Credit quota limit exceeded. Current monthly usage: ${quota.used}/${quota.limit}`,
-        'QUOTA_EXCEEDED',
-        403,
-        { used: quota.used, limit: quota.limit },
-        context.requestId
-      );
-    }
-
     const scoreOptions: ScoreOptions = {
       includeNeuronWriter: rawOptions?.includeNeuronWriter ?? false,
       includePerformance: rawOptions?.includePerformance ?? false,
@@ -91,9 +85,86 @@ async function handler(req: NextRequest, context: AuthenticatedContext) {
     // AI scoring always consumes credits, even if the caller asks not to persist the snapshot.
     const storeSnapshotAllowed = scoreOptions.storeSnapshot;
 
-    // --- Parse provided HTML content directly (no fetch) ---
     const draftUrl = url || `https://${site.domain}/draft/${contentId || 'untitled'}`;
     const normalizedUrl = normalizeUrl(draftUrl);
+    const contentHash =
+      typeof clientContentHash === 'string' && clientContentHash.length > 0
+        ? clientContentHash
+        : computeContentHash(html, targetKeyword, locale || site.defaultLocale);
+
+    const cachedSnapshotId = await findCachedContentSnapshot(
+      context.tenantId,
+      resolvedSiteId,
+      contentHash
+    );
+
+    if (cachedSnapshotId) {
+      const cached = await prisma.scoreSnapshot.findFirst({
+        where: {
+          id: cachedSnapshotId,
+          tenantId: context.tenantId,
+          siteId: resolvedSiteId,
+        },
+        include: {
+          moduleResults: true,
+          auditIssues: true,
+          recommendations: true,
+          providerEnrichments: true,
+          aiVisibilityCheck: true,
+        },
+      });
+
+      if (cached) {
+        const creditCharge = await chargeTenantCredits({
+          tenantId: context.tenantId,
+          siteId: resolvedSiteId,
+          featureKey: 'score.content',
+          endpoint: 'score/content',
+          cached: true,
+          metadata: { contentHash, snapshotId: cached.id },
+        });
+
+        const topIssues = cached.auditIssues
+          .filter((i) => i.severity !== 'info')
+          .slice(0, 10)
+          .map((iss) => ({
+            code: iss.code,
+            severity: iss.severity,
+            module: iss.module,
+            title: iss.title,
+            impact: iss.impact,
+            recommendation: iss.recommendation,
+            confidence: iss.confidence,
+          }));
+
+        return successResponse(
+          {
+            snapshotId: cached.id,
+            sourceType: 'draft_content',
+            scoreVersion: cached.scoreVersion,
+            url: cached.url,
+            normalizedUrl: cached.normalizedUrl,
+            finalScore: cached.finalScore,
+            scoreBand: cached.scoreBand,
+            topIssues,
+            quickWins: cached.recommendations.map((r) => ({
+              code: r.code,
+              title: r.title,
+              severity: r.severity,
+              recommendation: r.recommendation,
+              estimatedEffort: r.estimatedEffort,
+              estimatedImpact: r.estimatedImpact,
+            })),
+            providerEnrichments: cached.providerEnrichments,
+            cached: true,
+            creditsCharged: creditCharge.charged,
+            creditBalance: creditCharge.balance,
+          },
+          Date.now() - startTime,
+          context.requestId
+        );
+      }
+    }
 
     // For draft content, we simulate a 200 status since the content is provided directly
     const parsed = parseHtml(html, 200, {}, normalizedUrl);
@@ -121,6 +192,7 @@ async function handler(req: NextRequest, context: AuthenticatedContext) {
     };
 
     // --- Run Scoring Engine ---
+    await assertTenantHasCredits(context.tenantId, 'score.content');
     const engine = new ScoringEngine();
     const scoreOutput = await engine.scorePage(scoreContext, startTime);
 
@@ -224,21 +296,15 @@ async function handler(req: NextRequest, context: AuthenticatedContext) {
         },
       });
       snapshotId = snapshot.id;
-
-      // Track quota
-      await prisma.quotaUsage.create({
-        data: {
-          tenantId: context.tenantId,
-          siteId: resolvedSiteId,
-          endpoint: 'score/content',
-          units: 1,
-          date: new Date(new Date().toISOString().split('T')[0]),
-        },
-      });
     }
 
-    // Increment cached credit used in Tenant for every scored content, regardless of snapshot persistence.
-    await incrementTenantCredits(context.tenantId);
+    const creditCharge = await chargeTenantCredits({
+      tenantId: context.tenantId,
+      siteId: resolvedSiteId,
+      featureKey: 'score.content',
+      endpoint: 'score/content',
+      metadata: { contentHash, snapshotId: snapshotId ?? undefined, siteId: resolvedSiteId },
+    });
 
     // --- Build Response ---
     const responseData = {
@@ -277,10 +343,19 @@ async function handler(req: NextRequest, context: AuthenticatedContext) {
         errorMessage: pe.errorMessage,
       })),
       createdAt: new Date().toISOString(),
+      creditsCharged: creditCharge.charged,
+      creditBalance: creditCharge.balance,
     };
 
     return successResponse(responseData, scoreOutput.durationMs, context.requestId);
   } catch (error) {
+    if (error instanceof InsufficientCreditsError) {
+      return errorResponse(error.message, 'QUOTA_EXCEEDED', 429, {
+        used: error.used,
+        limit: error.limit,
+        required: error.required,
+      }, context.requestId);
+    }
     logApiError({
       requestId: context.requestId,
       tenantId: context.tenantId,

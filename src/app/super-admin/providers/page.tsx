@@ -39,6 +39,22 @@ export default async function SuperAdminProvidersPage() {
               </div>
 
               {/* Latency Detail */}
+                {'creditsRemaining' in p && p.creditsRemaining != null && (
+                <div className="text-sm space-y-1.5 pt-2 border-t border-gray-100">
+                  <div className="text-xs text-gray-400 font-semibold uppercase">
+                    {p.provider === 'SEOCrawl' ? 'Proje Sayısı' : 'Kalan Kredi'}
+                  </div>
+                  <code className="block text-xs bg-amber-50 p-2 rounded text-amber-800 font-mono">{p.creditsRemaining}</code>
+                </div>
+              )}
+
+              {p.detail && (
+                <div className="text-sm space-y-1.5 pt-2 border-t border-gray-100">
+                  <div className="text-xs text-gray-400 font-semibold uppercase">Detay</div>
+                  <code className="block text-xs bg-gray-50 p-2 rounded text-gray-700 font-mono truncate">{p.detail}</code>
+                </div>
+              )}
+
               <div className="text-sm space-y-1.5 pt-2 border-t border-gray-100">
                 <div className="text-xs text-gray-400 font-semibold uppercase">Ortalama Yanıt Süresi</div>
                 <code className="block text-xs bg-gray-50 p-2 rounded text-indigo-600 font-mono truncate">{p.latencyMs} ms</code>
@@ -50,7 +66,13 @@ export default async function SuperAdminProvidersPage() {
                   <ShieldAlert className="w-3.5 h-3.5 text-gray-400" /> Maskeli API Anahtarı
                 </div>
                 <code className="block text-xs bg-slate-900 text-slate-300 p-2 rounded font-mono select-none">
-                  {p.provider === 'NeuronWriter' ? 'NW_•••••••••' : 'KEY_•••••••••'}
+                  {p.provider === 'NeuronWriter'
+                    ? 'NW_•••••••••'
+                    : p.provider === 'VebAPI'
+                      ? 'VEB_•••••••••'
+                      : p.provider === 'SEOCrawl'
+                        ? 'sca_live_•••••••••'
+                        : 'KEY_•••••••••'}
                 </code>
               </div>
             </div>
@@ -66,7 +88,7 @@ export default async function SuperAdminProvidersPage() {
       <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex gap-3">
         <ShieldAlert className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
         <div className="text-sm text-amber-800 leading-relaxed">
-          <strong>Güvenlik Sınırı:</strong> API anahtarlarının plain-text olarak değiştirilmesi veya arayüzde gösterilmesi MVP kapsamında desteklenmemektedir. Anahtarları güncellemek için sunucu ortam değişkenlerindeki (`NEURONWRITER_API_KEY`, `PAGESPEED_API_KEY`) parametreleri güncelleyip Next.js uygulamasını yeniden başlatın.
+          <strong>Güvenlik Sınırı:</strong> API anahtarlarının plain-text olarak değiştirilmesi veya arayüzde gösterilmesi MVP kapsamında desteklenmemektedir. Anahtarları güncellemek için sunucu ortam değişkenlerindeki (`NEURONWRITER_API_KEY`, `PAGESPEED_API_KEY`, `SEOCRAWL_API_KEY`, `VEBAPI_API_KEY`) parametreleri güncelleyip Next.js uygulamasını yeniden başlatın. Sağlayıcıları kapatmak için `SEOCRAWL_ENABLED=false` veya `VEBAPI_ENABLED=false` kullanın.
         </div>
       </div>
     </div>

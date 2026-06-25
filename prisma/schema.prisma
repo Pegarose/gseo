@@ -27,6 +27,7 @@ model Tenant {
   integrations Integration[]
   webhooks     Webhook[]
   auditLogs    AuditLog[]
+  creditLedger CreditLedgerEntry[]
 }
 
 model User {
@@ -104,19 +105,19 @@ model Site {
 }
 
 model Page {
-  id            String   @id @default(uuid())
+  id            String    @id @default(uuid())
   tenantId      String
-  tenant        Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  tenant        Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   siteId        String
-  site          Site     @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  site          Site      @relation(fields: [siteId], references: [id], onDelete: Cascade)
   url           String
   normalizedUrl String
-  pageType      String   @default("generic") // homepage, article, product, category, landing, documentation, local_business, generic
+  pageType      String    @default("generic") // homepage, article, product, category, landing, documentation, local_business, generic
   targetKeyword String?
   locale        String
   lastScoredAt  DateTime?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 
   snapshots ScoreSnapshot[]
 
@@ -144,17 +145,70 @@ model ApiKey {
 }
 
 model QuotaUsage {
-  id        String   @id @default(uuid())
-  tenantId  String
-  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  siteId    String?
-  endpoint  String
-  units     Int      @default(1)
-  date      DateTime // Format: YYYY-MM-DD
-  createdAt DateTime @default(now())
+  id           String   @id @default(uuid())
+  tenantId     String
+  tenant       Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  siteId       String?
+  endpoint     String
+  featureKey   String?
+  provider     String?
+  providerCost Int      @default(0)
+  units        Int      @default(1)
+  cached       Boolean  @default(false)
+  date         DateTime // Format: YYYY-MM-DD
+  createdAt    DateTime @default(now())
 
   @@index([tenantId])
   @@index([tenantId, date])
+  @@index([featureKey])
+}
+
+/**
+ * Global credit markup — default ×10 on provider cost
+ */
+model CreditPricingGlobal {
+  id                      Int      @id @default(1)
+  defaultMarkupMultiplier Float    @default(10)
+  updatedAt               DateTime @updatedAt
+}
+
+/**
+ * Per-feature sell price (super admin managed)
+ */
+model CreditFeaturePricing {
+  id                  String   @id @default(uuid())
+  featureKey          String   @unique
+  label               String
+  category            String // execution | intelligence
+  provider            String // internal | vebapi | domaindetailer | similarweb | neuronwriter
+  providerCostCredits Int      @default(0)
+  sellCredits         Int      @default(1)
+  useAutoMarkup       Boolean  @default(true)
+  enabled             Boolean  @default(true)
+  description         String?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@index([category])
+  @@index([provider])
+}
+
+model CreditLedgerEntry {
+  id           String   @id @default(uuid())
+  tenantId     String
+  tenant       Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  featureKey   String
+  provider     String?
+  providerCost Int      @default(0)
+  sellCredits  Int
+  cached       Boolean  @default(false)
+  siteId       String?
+  metadata     Json?
+  createdAt    DateTime @default(now())
+
+  @@index([tenantId])
+  @@index([tenantId, createdAt])
+  @@index([featureKey])
 }
 
 model ScoreSnapshot {
@@ -169,11 +223,11 @@ model ScoreSnapshot {
   normalizedUrl String
   scoreVersion  String   @default("seosuite-score-v1.1")
   finalScore    Int
-  scoreBand     String   // excellent, good, needs_improvement, poor, critical
+  scoreBand     String // excellent, good, needs_improvement, poor, critical
   pageType      String
   locale        String
   platform      String
-  source        String   // live_url, draft_content
+  source        String // live_url, draft_content
   durationMs    Int
   createdAt     DateTime @default(now())
 
@@ -211,7 +265,7 @@ model AuditIssue {
   scoreSnapshotId    String
   scoreSnapshot      ScoreSnapshot @relation(fields: [scoreSnapshotId], references: [id], onDelete: Cascade)
   code               String
-  severity           String        // critical, high, medium, low, info, experimental
+  severity           String // critical, high, medium, low, info, experimental
   module             String
   title              String
   impact             String
@@ -236,8 +290,8 @@ model Recommendation {
   severity           String
   recommendation     String
   implementationHint String?
-  estimatedEffort    String        // low, medium, high
-  estimatedImpact    String        // low, medium, high
+  estimatedEffort    String // low, medium, high
+  estimatedImpact    String // low, medium, high
   confidence         Float
   createdAt          DateTime      @default(now())
 
@@ -251,7 +305,7 @@ model Integration {
   tenant         Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   siteId         String?
   site           Site?    @relation(fields: [siteId], references: [id], onDelete: Cascade)
-  provider       String   // neuronwriter, google_search_console, pagespeed
+  provider       String // neuronwriter, google_search_console, pagespeed
   status         String   @default("active")
   encryptedCreds String
   configJson     Json?
@@ -267,8 +321,8 @@ model ProviderEnrichment {
   tenantId           String
   scoreSnapshotId    String
   scoreSnapshot      ScoreSnapshot @relation(fields: [scoreSnapshotId], references: [id], onDelete: Cascade)
-  provider           String        // neuronwriter, etc.
-  status             String        // success, failed
+  provider           String // neuronwriter, etc.
+  status             String // success, failed
   requestMetaJson    Json?
   responseMetaJson   Json?
   normalizedDataJson Json?
@@ -280,16 +334,16 @@ model ProviderEnrichment {
 }
 
 model InternalLinkOpportunity {
-  id              String        @id @default(uuid())
-  tenantId        String
-  scoreSnapshotId String
-  scoreSnapshot   ScoreSnapshot @relation(fields: [scoreSnapshotId], references: [id], onDelete: Cascade)
-  targetUrl       String
+  id               String        @id @default(uuid())
+  tenantId         String
+  scoreSnapshotId  String
+  scoreSnapshot    ScoreSnapshot @relation(fields: [scoreSnapshotId], references: [id], onDelete: Cascade)
+  targetUrl        String
   anchorSuggestion String
-  reason          String
-  relationship    String
-  confidence      Float
-  createdAt       DateTime      @default(now())
+  reason           String
+  relationship     String
+  confidence       Float
+  createdAt        DateTime      @default(now())
 
   @@index([tenantId])
   @@index([scoreSnapshotId])
@@ -306,7 +360,7 @@ model AiVisibilityCheck {
   entityClarity              Float
   aiParseability             Float
   brandTrustSignals          Float
-  platformReadinessJson      Json          // ChatGPT, Perplexity, Google AIO, Bing Copilot readiness ratings
+  platformReadinessJson      Json // ChatGPT, Perplexity, Google AIO, Bing Copilot readiness ratings
   createdAt                  DateTime      @default(now())
 
   @@index([tenantId])
@@ -320,7 +374,7 @@ model Webhook {
   site      Site?    @relation(fields: [siteId], references: [id], onDelete: Cascade)
   url       String
   events    String[] // score.completed, score.failed, site.crawl.completed, quota.warning
-  secret    String?  // HMAC signature secret
+  secret    String? // HMAC signature secret
   active    Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -332,33 +386,33 @@ model Webhook {
 }
 
 model WebhookDelivery {
-  id        String   @id @default(uuid())
-  webhookId String
-  webhook   Webhook  @relation(fields: [webhookId], references: [id], onDelete: Cascade)
-  event     String
-  payload   Json
-  status    String   // pending, delivered, failed
-  statusCode Int?
+  id           String    @id @default(uuid())
+  webhookId    String
+  webhook      Webhook   @relation(fields: [webhookId], references: [id], onDelete: Cascade)
+  event        String
+  payload      Json
+  status       String // pending, delivered, failed
+  statusCode   Int?
   responseBody String?
-  createdAt DateTime @default(now())
-  deliveredAt DateTime?
+  createdAt    DateTime  @default(now())
+  deliveredAt  DateTime?
 
   @@index([webhookId])
   @@index([createdAt])
 }
 
 model AuditLog {
-  id          String   @id @default(uuid())
-  tenantId    String?
-  tenant      Tenant?  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  actorId     String?  // User id or API key id
-  actorType   String   // user, api_key
-  action      String   // tenant.plan_updated, tenant.quota_synced, site.crawl_queued, etc.
-  resource    String?  // affected resource id
-  metadata    Json?
-  ipAddress   String?
-  userAgent   String?
-  createdAt   DateTime @default(now())
+  id        String   @id @default(uuid())
+  tenantId  String?
+  tenant    Tenant?  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  actorId   String? // User id or API key id
+  actorType String // user, api_key
+  action    String // tenant.plan_updated, tenant.quota_synced, site.crawl_queued, etc.
+  resource  String? // affected resource id
+  metadata  Json?
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
 
   @@index([tenantId])
   @@index([actorId])

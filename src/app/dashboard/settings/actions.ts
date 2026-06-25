@@ -1,16 +1,11 @@
 'use server';
 
-import { auth } from '@/auth';
 import { prisma } from '@/lib/db/prisma';
 import { getPlanLimits } from '@/lib/plans/plans';
+import { getDashboardTenantContext } from '../actions';
 
 export async function getDashboardSettings() {
-  const session = await auth();
-  const tenantId = session?.user.tenantId;
-
-  if (!tenantId) {
-    throw new Error('No tenant associated with this account.');
-  }
+  const { tenantId } = await getDashboardTenantContext();
 
   const tenant = await prisma.tenant.findUnique({
     where: { id: tenantId },

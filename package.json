@@ -6,11 +6,16 @@
     "dev": "next dev -p 3001",
     "build": "next build",
     "start": "next start -p 3001",
-    "lint": "eslint"
+    "lint": "eslint",
+    "vebapi:smoke": "tsx --env-file=.env scripts/vebapi-smoke.ts",
+    "vebapi:smoke:basic": "tsx --env-file=.env scripts/vebapi-smoke.ts --basic",
+    "seocrawl:smoke": "tsx --env-file=.env scripts/seocrawl-smoke.ts",
+    "seocrawl:smoke:gsc": "tsx --env-file=.env scripts/seocrawl-smoke.ts --gsc"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.2",
     "@prisma/client": "^6.19.3",
+    "@seosuite/next": "file:./packages/nextjs-sdk",
     "@types/ioredis": "^4.28.10",
     "bcryptjs": "^3.0.3",
     "bullmq": "^5.78.1",

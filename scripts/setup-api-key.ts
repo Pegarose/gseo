@@ -46,7 +46,7 @@ async function runSetup() {
       name: 'EfesusStone Development Key',
       keyPrefix: rawKey.substring(0, 12),
       keyHash: hashedKey,
-      scopes: ['score:read', 'score:write', 'site:read', 'site:write', 'quota:read']
+      scopes: ['score:read', 'score:write', 'site:read', 'site:write', 'quota:read', 'semantic:read', 'ai:read', 'links:read', 'nw:read']
     }
   });
   

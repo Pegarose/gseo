@@ -93,7 +93,7 @@ export default function TenantCreditSync({ tenantId, initialUsed, limit }: Props
 
         <div className="pt-2 flex justify-between items-center gap-4">
           <p className="text-xs text-gray-400 leading-normal">
-            Kullanım miktarı her denetimde (score/url, score/content) otomatik artar. Veritabanındaki QuotaUsage detaylarıyla eşitsizlik varsa yeniden hesaplatabilirsiniz.
+            Kullanım, özellik başına satış kredisi ile düşülür (sağlayıcı maliyeti × markup). QuotaUsage ile eşitsizlik varsa yeniden hesaplatın.
           </p>
           <button
             onClick={handleSync}

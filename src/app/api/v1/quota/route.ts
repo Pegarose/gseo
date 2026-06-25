@@ -77,6 +77,10 @@ async function handler(req: NextRequest, context: AuthenticatedContext) {
     const data = {
       tenantId: context.tenantId,
       plan,
+      credits: {
+        used: tenant.aiCreditUsed,
+        limit: tenant.aiCreditLimit,
+      },
       period: {
         start: periodStart.toISOString(),
         end: periodEnd.toISOString(),

@@ -48,6 +48,10 @@ test-phase*.jsx
 test-*.ts
 test-*.js
 
+# Yerel referans klonları (OpenSEO vb.)
+.reference/
+.vendor/
+
 # Dogfooding Raporları ve Çıktıları
 dogfood-report.json
 dogfood-summary.md

@@ -10,7 +10,8 @@ import {
   BarChart3,
   Cpu,
   ArrowLeft,
-  ScrollText
+  ScrollText,
+  Coins,
 } from 'lucide-react';
 import SuperAdminLoginForm from './LoginForm';
 import LogoutButton from './LogoutButton';
@@ -21,6 +22,7 @@ const navigation = [
   { name: 'Genel Bakış', href: '/super-admin', icon: Activity },
   { name: 'Kiracılar', href: '/super-admin/tenants', icon: Users },
   { name: 'Audit Logları', href: '/super-admin/audit-logs', icon: ScrollText },
+  { name: 'Kredi Fiyatları', href: '/super-admin/credits', icon: Coins },
   { name: 'Sağlayıcılar', href: '/super-admin/providers', icon: Cpu },
   { name: 'Kullanım Analitiği', href: '/super-admin/usage', icon: BarChart3 },
   { name: 'Sistem Durumu', href: '/super-admin/system', icon: ShieldAlert },

@@ -11,7 +11,11 @@ import { ScoreContext, ScoreOptions, Recommendation } from '@/lib/scoring/types'
 import { checkRateLimit } from '@/lib/rate-limit';
 import { createRateLimitResponse } from '@/lib/utils/rate-limit';
 import { logApiError } from '@/lib/utils/logger';
-import { checkQuotaLimit, incrementTenantCredits } from '@/lib/auth/quota';
+import {
+  assertTenantHasCredits,
+  chargeTenantCredits,
+  InsufficientCreditsError,
+} from '@/lib/credits/charge';
 
 const MAX_URL_LENGTH = 2048;
 
@@ -58,17 +62,6 @@ async function handler(req: NextRequest, context: AuthenticatedContext) {
       return errorResponse('Site not found or access denied.', 'NOT_FOUND', 404, { siteId: resolvedSiteId }, context.requestId);
     }
 
-    // --- Quota Limit Check ---
-    const quota = await checkQuotaLimit(context.tenantId);
-    if (!quota.success) {
-      return errorResponse(
-        `AI Credit quota limit exceeded. Current monthly usage: ${quota.used}/${quota.limit}`,
-        'QUOTA_EXCEEDED',
-        403,
-        { used: quota.used, limit: quota.limit },
-        context.requestId
-      );
-    }
 
     const scoreOptions: ScoreOptions = {
       includeNeuronWriter: rawOptions?.includeNeuronWriter ?? false,
@@ -121,6 +114,7 @@ async function handler(req: NextRequest, context: AuthenticatedContext) {
     };
 
     // --- Run Scoring Engine ---
+    await assertTenantHasCredits(context.tenantId, 'score.url');
     const engine = new ScoringEngine();
     const scoreOutput = await engine.scorePage(scoreContext, startTime);
 
@@ -224,21 +218,14 @@ async function handler(req: NextRequest, context: AuthenticatedContext) {
         },
       });
       snapshotId = snapshot.id;
-
-      // Track quota
-      await prisma.quotaUsage.create({
-        data: {
-          tenantId: context.tenantId,
-          siteId: resolvedSiteId,
-          endpoint: 'score/url',
-          units: 1,
-          date: new Date(new Date().toISOString().split('T')[0]), // Day start
-        },
-      });
     }
 
-    // Increment cached credit used in Tenant for every scored URL, regardless of snapshot persistence.
-    await incrementTenantCredits(context.tenantId);
+    const creditCharge = await chargeTenantCredits({
+      tenantId: context.tenantId,
+      siteId: resolvedSiteId,
+      featureKey: 'score.url',
+      endpoint: 'score/url',
+    });
 
     // --- Build Response ---
     const responseData = {
@@ -276,10 +263,19 @@ async function handler(req: NextRequest, context: AuthenticatedContext) {
         errorMessage: pe.errorMessage,
       })),
       createdAt: new Date().toISOString(),
+      creditsCharged: creditCharge.charged,
+      creditBalance: creditCharge.balance,
     };
 
     return successResponse(responseData, scoreOutput.durationMs, context.requestId);
   } catch (error) {
+    if (error instanceof InsufficientCreditsError) {
+      return errorResponse(error.message, 'QUOTA_EXCEEDED', 429, {
+        used: error.used,
+        limit: error.limit,
+        required: error.required,
+      }, context.requestId);
+    }
     logApiError({
       requestId: context.requestId,
       tenantId: context.tenantId,

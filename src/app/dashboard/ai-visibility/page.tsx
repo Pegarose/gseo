@@ -1,10 +1,15 @@
 import { getAiVisibilityOverview } from '../actions';
+import { listTenantSitesForIntel } from '../vebapi-actions';
+import AiCrawlerPanel from './AiCrawlerPanel';
+import { isVebApiConfigured } from '@/lib/providers/vebapi/service';
 import { Sparkles, Info, AlertTriangle, FileText, HelpCircle, CheckCircle2 } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
 export default async function AiVisibilityPage() {
   const data = await getAiVisibilityOverview();
+  const sites = await listTenantSitesForIntel();
+  const vebApiEnabled = isVebApiConfigured();
 
   return (
     <div className="space-y-6">
@@ -85,6 +90,8 @@ export default async function AiVisibilityPage() {
           </div>
         </div>
       </div>
+
+      <AiCrawlerPanel sites={sites} vebApiEnabled={vebApiEnabled} />
 
       {/* Pages Needing AI Readiness Work */}
       <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden mt-8">

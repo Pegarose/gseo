@@ -8,7 +8,11 @@
     "skipLibCheck": true,
     "declaration": true,
     "jsx": "react-jsx",
-    "outDir": "dist"
+    "outDir": "dist",
+    "baseUrl": ".",
+    "paths": {
+      "~/*": ["src/vendor/next-seo/*"]
+    }
   },
   "include": ["src"]
 }

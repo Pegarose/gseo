@@ -4,7 +4,10 @@ import { prisma } from '@/lib/db/prisma';
  * Checks if a tenant has remaining AI scoring credits.
  * If aiCreditLimit is 0, it is considered unlimited.
  */
-export async function checkQuotaLimit(tenantId: string): Promise<{
+export async function checkQuotaLimit(
+  tenantId: string,
+  additionalUnits = 0
+): Promise<{
   success: boolean;
   used: number;
   limit: number;
@@ -24,8 +27,7 @@ export async function checkQuotaLimit(tenantId: string): Promise<{
   const limit = tenant.aiCreditLimit;
   const used = tenant.aiCreditUsed;
 
-  // 0 means unlimited
-  if (limit > 0 && used >= limit) {
+  if (limit > 0 && used + additionalUnits > limit) {
     return { success: false, used, limit };
   }
 
@@ -33,14 +35,17 @@ export async function checkQuotaLimit(tenantId: string): Promise<{
 }
 
 /**
- * Atomically increments the tenant's AI credit used counter by 1.
+ * Atomically increments the tenant's credit used counter.
  */
-export async function incrementTenantCredits(tenantId: string): Promise<number> {
+export async function incrementTenantCredits(
+  tenantId: string,
+  amount = 1
+): Promise<number> {
   const updated = await prisma.tenant.update({
     where: { id: tenantId },
     data: {
       aiCreditUsed: {
-        increment: 1,
+        increment: amount,
       },
     },
     select: {

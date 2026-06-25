@@ -3,6 +3,8 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { Globe, ArrowLeft, Settings2, BarChart2 } from 'lucide-react';
 import RunSiteAudit from './RunSiteAudit';
+import PageAnalyzer from './PageAnalyzer';
+import SiteGscLink from './SiteGscLink';
 
 export const dynamic = 'force-dynamic';
 
@@ -86,6 +88,10 @@ export default async function SiteDetailPage({ params }: { params: { id: string 
           <dd className="mt-2 text-3xl font-bold text-gray-900">{site.snapshots.length}</dd>
         </div>
       </div>
+
+      <PageAnalyzer siteId={site.id} domain={site.domain} />
+
+      <SiteGscLink siteId={site.id} domain={site.domain} />
 
       {/* Recent Snapshots Table */}
       <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden flex flex-col">

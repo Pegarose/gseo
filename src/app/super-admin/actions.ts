@@ -140,11 +140,48 @@ export async function syncTenantCredits(tenantId: string) {
 export async function getProviderHealth() {
   await requireSuperAdmin();
 
-  // Placeholder provider health data. In production these would come from real health checks.
-  return [
+  const { checkVebApiHealth } = await import('@/lib/providers/vebapi');
+  const { checkSeoCrawlHealth } = await import('@/lib/providers/seocrawl');
+  const [veb, seocrawl] = await Promise.all([checkVebApiHealth(), checkSeoCrawlHealth()]);
+
+  const providers: {
+    provider: string;
+    status: string;
+    latencyMs: number;
+    lastCheckedAt: string;
+    creditsRemaining?: number | null;
+    detail?: string;
+  }[] = [
     { provider: 'NeuronWriter', status: 'operational', latencyMs: 245, lastCheckedAt: new Date().toISOString() },
     { provider: 'PageSpeed', status: 'operational', latencyMs: 120, lastCheckedAt: new Date().toISOString() },
+    {
+      provider: seocrawl.provider,
+      status:
+        seocrawl.status === 'operational'
+          ? 'operational'
+          : seocrawl.status === 'disabled'
+            ? 'disabled'
+            : 'failed',
+      latencyMs: seocrawl.latencyMs,
+      lastCheckedAt: seocrawl.lastCheckedAt,
+      creditsRemaining: seocrawl.propertyCount,
+      detail: seocrawl.errorMessage
+        ? seocrawl.errorMessage
+        : seocrawl.propertyCount != null
+          ? `${seocrawl.propertyCount} SEOCrawl projesi`
+          : undefined,
+    },
+    {
+      provider: veb.provider,
+      status: veb.status === 'operational' ? 'operational' : veb.status === 'disabled' ? 'disabled' : 'failed',
+      latencyMs: veb.latencyMs,
+      lastCheckedAt: veb.lastCheckedAt,
+      creditsRemaining: veb.creditsRemaining,
+      detail: veb.errorMessage,
+    },
   ];
+
+  return providers;
 }
 
 export async function getGlobalUsageStats() {
