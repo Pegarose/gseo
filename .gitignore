@@ -62,3 +62,5 @@ wp-product-translations.txt
 *.log
 *.zip
 dist/
+packages/nextjs-sdk/node_modules/@next/swc-win32-x64-msvc/next-swc.win32-x64-msvc.node
+packages/nextjs-sdk/node_modules/@rollup/rollup-win32-x64-msvc/rollup.win32-x64-msvc.node
